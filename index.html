@@ -381,7 +381,7 @@ svg.bnr.lg{width:38px;height:49px}
 <section class="tab" data-tab="x" id="tab-x"><div id="xfeed"></div></section>
 <section class="tab" data-tab="cap">
 <div class="card" id="capcard">
-  <h2>Salary cap <small>preseason</small></h2>
+  <h2>Salary cap <small>as of Nov 16</small></h2>
   <div id="cap"></div>
 </div>
 
@@ -867,12 +867,12 @@ function renderPlayers(){
 }
 
 /* ---------- Salary cap (snapshot: nhltraderumor.com cap table, Oct 26 2026; PuckPedia for statuses) ---------- */
-const CAP={limit:104000000,total:90217917,overage:0,asOf:'preseason',roster:23,note:'Team totals are PuckPedia\'s preseason projection. The player-by-player breakdown fills in with the weekly cap update.',F:[],D:[],G:[]};
+const CAP={"limit": 104000000, "total": 91334584, "space": 12665416, "overage": 0, "F": [["Trevor Zegras", "LW/C", 25, 9125000, 4, "UFA"], ["Travis Konecny", "RW/LW", 29, 8750000, 7, "UFA"], ["Sean Couturier", "C", 33, 7750000, 4, "UFA"], ["Owen Tippett", "RW/LW", 27, 6200000, 6, "UFA"], ["Christian Dvorak", "C", 30, 5150000, 5, "UFA"], ["Noah Cates", "C/RW", 27, 4000000, 3, "UFA"], ["Tyson Foerster", "LW/RW", 24, 3750000, 9, "UFA", "", 7100000], ["Noel Acciari", "RW/C", 34, 2800000, 2, "UFA"], ["Michael Bunting", "LW/RW", 31, 1200000, 1, "UFA"], ["Nikita Grebenkin", "LW/RW", 23, 1100000, 2, "RFA"], ["Cole Knuble", "RW/LW", 22, 980000, 2, "RFA"], ["Porter Martone", "LW/RW", 20, 977917, 2, "RFA"], ["Matvei Michkov", "RW", 21, 950000, 1, "RFA"], ["Denver Barkey", "LW/C", 21, 925833, 2, "RFA"]], "D": [["Jamie Drysdale", "RD", 24, 6500000, 4, "UFA"], ["Travis Sanheim", "LD", 30, 6250000, 5, "UFA"], ["Cam York", "LD", 25, 5150000, 4, "UFA"], ["Rasmus Ristolainen", "RD", 32, 5100000, 1, "UFA"], ["Nick Seeler", "LD/RD", 33, 2700000, 2, "UFA"], ["David Jiricek", "RD", 22, 1500000, 2, "RFA"], ["Simon Benoit", "RD/LD", 28, 1350000, 1, "UFA"], ["Oliver Bonk", "RD", 21, 909167, 2, "RFA"]], "G": [["Joseph Woll", "G", 28, 3666667, 2, "UFA"], ["Dan Vladar", "G", 29, 3350000, 6, "UFA", "", 5500000]], "asOf": "Nov 16", "foot": "Source: CapWages, Nov 16."};
 const money=(v,d=2)=>'$'+(v/1e6).toFixed(d)+'M';
 const thru=y=>{const a=2026+y-1;return `${a}-${String(a+1).slice(2)}`};
 function renderCap(){
   const sum=a=>a.reduce((t,p)=>t+p[3],0);
-  const f=sum(CAP.F),d=sum(CAP.D),g=sum(CAP.G),other=CAP.total-f-d-g, space=CAP.limit-CAP.total;
+  const f=sum(CAP.F),d=sum(CAP.D),g=sum(CAP.G),other=Math.max(0,CAP.total-f-d-g), space=CAP.space??(CAP.limit-CAP.total);
   const seg=[['Forwards',f,getComputedStyle(document.documentElement).getPropertyValue('--red').trim()||'#ce1126'],['Defense',d,'#f4f4f5'],['Goalies',g,'#8b8b94'],['Overage & other',other,'#4a4a52']];
   const all=[...CAP.F,...CAP.D,...CAP.G], exp=all.filter(p=>p[4]===1);
   if(!all.length){ // totals only (player-by-player breakdown not loaded yet)
@@ -895,7 +895,7 @@ function renderCap(){
        <div class="yrs">${Array.from({length:8},(_,i)=>`<i class="${i<yrs?'on':''}"></i>`).join('')}</div></div>
        <div class="amt"><b>${money(hit)}</b><span>${yrs} yr${yrs>1?'s':''} left · ${(hit/CAP.limit*100).toFixed(1)}%</span>${full?`<span style="display:block">${money(full,1)} from '27-28</span>`:''}</div></div>`).join('')+'</div>';
   }
-  h+=`<div class="sub" style="margin-top:12px;line-height:1.5">Hellebuyck's charge is prorated this season after the Oct 23 trade. "Overage & other" is last season's $1.25M bonus overage plus remaining charges (IR, etc.) needed to reach the reported total. Contract data doesn't update live.</div>`;
+  h+=`<div class="sub" style="margin-top:12px;line-height:1.5">${CAP.foot||''} Contract data updates weekly, not live.</div>`;
   document.getElementById('cap').innerHTML=h;
 }
 
