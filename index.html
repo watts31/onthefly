@@ -731,8 +731,9 @@ function render(){
   const row=(t,seed,cls='')=>`<tr class="${t===ME?'me':''} ${cls}"><td class="seed">${seed}</td><td><div class="tn">${mark(t,22)}${TEAMS[t][0]}</div></td><td class="r" style="color:var(--mut)">${STAND[t]?.[0]??'–'}</td><td class="r">${STAND[t]?.[1]??'–'}</td></tr>`;
   document.getElementById('cutline').textContent=gap>=0?`${gap} clear of the cut`:`${-gap} back`;
   document.getElementById('picture').innerHTML=`<tr class="sec"><td></td><td>Metropolitan</td><td class="r" style="font-size:10px">GP</td><td class="r" style="font-size:10px">PTS</td></tr>`+
-    pic.metro.map((t,i)=>row(t,'M'+(i+1))).join('')+`<tr class="sec"><td></td><td colspan="3">Wild card</td></tr>`+
-    pic.wc.map((t,i)=>row(t,'WC'+(i+1))).join('')+pic.chasers.map((t,i)=>row(t,'',i===0?'cut':'')).join('');
+    pic.metro.map((t,i)=>row(t,'M'+(i+1))).join('')+`<tr class="sec"><td></td><td colspan="3">Atlantic</td></tr>`+
+    pic.atl.map((t,i)=>row(t,'A'+(i+1))).join('')+`<tr class="sec"><td></td><td colspan="3">Wild card</td></tr>`+
+    pic.wc.map((t,i)=>row(t,'WC'+(i+1))).join('')+pic.chasers.map((t,i)=>row(t,String(i+9),i===0?'cut':'')).join('');
 
   document.getElementById('foot').innerHTML=LIVE?`Scores: ESPN public feed · Player stats: NHL public API`:
     `Showing a snapshot from ${SNAP_AS_OF}. Live updates need the app opened from its own web address.`;
@@ -742,7 +743,7 @@ function picture(){
   const top3=d=>ORDER[d].filter(t=>STAND[t]).slice(0,3);
   const metro=top3('Metropolitan'), atl=top3('Atlantic');
   const rest=[...ORDER.Atlantic,...ORDER.Metropolitan].filter(t=>STAND[t]&&!metro.includes(t)&&!atl.includes(t)).sort((a,b)=>rank(b)-rank(a));
-  return {metro,wc:rest.slice(0,2),chasers:rest.slice(2,5)};
+  return {metro,atl,wc:rest.slice(0,2),chasers:rest.slice(2)};
 }
 
 /* ---------- Sheets ---------- */
