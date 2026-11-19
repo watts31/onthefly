@@ -330,6 +330,12 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 .shead .grab{margin:0}
 .shx{all:unset;cursor:pointer;position:absolute;right:12px;top:12px;width:32px;height:32px;border-radius:50%;background:#26262c;color:#fff;display:grid;place-items:center;font-size:14px}
 
+
+/* team-logo tab icon (one colour, like the other icons) */
+.tabbar .tlogo{display:none;width:25px;height:25px;background:currentColor;-webkit-mask:center/contain no-repeat;mask:center/contain no-repeat}
+.tabbar.haslogo .tlogo{display:block}.tabbar.haslogo #thouse{display:none}
+.tabbar button.on .tlogo{background:var(--red)}
+
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s;z-index:5}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -426,7 +432,7 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 <div class="foot" id="foot"></div>
 
 <nav class="tabbar" id="tabbar">
- <button data-go="home"><svg viewBox="0 0 24 24"><path d="M12 3 2 11h3v10h5v-6h4v6h5V11h3z"/></svg><span>Home</span><i class="ldot"></i></button>
+ <button data-go="home"><span class="tlogo" id="tlogo"></span><svg id="thouse" viewBox="0 0 24 24"><path d="M12 3 2 11h3v10h5v-6h4v6h5V11h3z"/></svg><span>Home</span><i class="ldot"></i></button>
  <button data-go="season"><svg viewBox="0 0 24 24"><path d="M4 20V10h3v10zm6.5 0V4h3v16zM17 20v-7h3v7z"/></svg><span>Season</span></button>
  <button data-go="players"><svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7.5 0a3.5 3.5 0 1 0 0-7M2 20c0-3.9 3.1-7 7-7s7 3.1 7 7zm15.5-6.8c2.6.5 4.5 2.9 4.5 5.8v1h-4"/></svg><span>Players</span></button>
  <button data-go="cap"><svg viewBox="0 0 24 24"><path d="M13 3v2.1c2 .4 3.4 1.7 3.6 3.6h-2.3c-.2-1-1.1-1.7-2.6-1.7-1.6 0-2.4.8-2.4 1.7 0 1 .8 1.5 3 2 2.6.6 4.6 1.6 4.6 4.1 0 1.9-1.4 3.2-3.9 3.6V21h-2v-2.1c-2.3-.4-3.9-1.8-4-4h2.3c.2 1.2 1.2 2 3 2 1.9 0 2.6-.9 2.6-1.8 0-1.1-.7-1.6-3-2.2-2.4-.6-4.5-1.5-4.5-3.9 0-1.8 1.4-3.2 3.6-3.6V3z"/></svg><span>Cap</span></button>
@@ -1222,6 +1228,27 @@ async function showClip(i){
   const st=document.getElementById('cvstage'); let x0=null;
   st.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
   st.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>60)stepClip(dx<0?1:-1)},{passive:true});
+})();
+
+/* Home tab icon: the team logo turned into a one-colour shape (white parts become cut-outs). */
+(async()=>{
+  try{
+    const code=ESPN_CODE[ME]||ME.toLowerCase();
+    let blob=null;
+    for(const u of ['data/logo.png',`https://raw.githubusercontent.com/${REPO}/main/data/logo.png`,`https://a.espncdn.com/i/teamlogos/nhl/500/${code}.png`]){
+      try{const r=await fetch(u,{mode:'cors'}); if(r.ok&&/image/.test(r.headers.get('content-type')||'')){blob=await r.blob();break}}catch(e){}}
+    if(!blob)throw 0;
+    const img=await createImageBitmap(blob);
+    const S=96, c=document.createElement('canvas'); c.width=c.height=S; const x=c.getContext('2d');
+    const k=Math.min(S/img.width,S/img.height); x.drawImage(img,(S-img.width*k)/2,(S-img.height*k)/2,img.width*k,img.height*k);
+    const d=x.getImageData(0,0,S,S), p=d.data;
+    for(let i=0;i<p.length;i+=4){const lum=(0.2126*p[i]+0.7152*p[i+1]+0.0722*p[i+2])/255;
+      const a=p[i+3]*(lum>0.82?0:1); p[i]=p[i+1]=p[i+2]=0; p[i+3]=a;}
+    x.putImageData(d,0,0);
+    const url=c.toDataURL('image/png'), el=document.getElementById('tlogo');
+    el.style.webkitMaskImage=el.style.maskImage=`url(${url})`;
+    document.getElementById('tabbar').classList.add('haslogo');
+  }catch(e){/* keep the house icon */}
 })();
 
 /* ---------- Next-game preview ---------- */

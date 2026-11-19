@@ -1,7 +1,15 @@
 // Runs on GitHub's servers (GitHub Actions). Fetches team player stats, jersey numbers
 // and special teams from the NHL's public API, and saves them to data/players.json,
 // which the app reads. (Phones can't call the NHL API directly: it blocks other websites.)
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+// Keep a copy of the team logo in the repo (the app turns it into its Home tab icon).
+const LOGO = 'phi';
+if (!existsSync('data/logo.png')) {
+  try {
+    const r = await fetch(`https://a.espncdn.com/i/teamlogos/nhl/500/${LOGO}.png`);
+    if (r.ok) { mkdirSync('data', { recursive: true }); writeFileSync('data/logo.png', Buffer.from(await r.arrayBuffer())); console.log('Saved logo'); }
+  } catch (e) { console.warn('logo', e.message); }
+}
 
 const now = new Date();
 const y = now.getUTCFullYear();
