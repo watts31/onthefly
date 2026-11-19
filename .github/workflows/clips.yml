@@ -1,0 +1,28 @@
+name: Update goal clips
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # every 5 minutes (exits quickly when there's no game)
+  workflow_dispatch:
+  push:
+    paths: ['scripts/fetch-clips.mjs', '.github/workflows/clips.yml']
+permissions:
+  contents: write
+concurrency: clips
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/fetch-clips.mjs
+      - name: Save if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/clips.json 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git commit -m "Update goal clips"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

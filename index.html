@@ -294,6 +294,34 @@ svg.bnr.lg{width:38px;height:49px}
 .skg .lt:first-child .ltb svg.bnr.lg{width:36px;height:46px}
 .lt .ltb .jn{width:34px;height:34px}
 
+
+/* goal clips */
+.goal .cthumb{all:unset;cursor:pointer;position:relative;width:64px;height:36px;border-radius:7px;overflow:hidden;background:#26262c center/cover;flex:none;margin-left:8px;box-shadow:0 0 0 1px #2e2e36}
+.goal .cthumb img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .25s}
+.goal .cthumb img.on{opacity:1}
+.goal .cthumb span{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:13px;background:linear-gradient(0deg,rgba(0,0,0,.45),rgba(0,0,0,.1));text-shadow:0 1px 3px #000}
+.bx-sec h3.sch{display:flex;justify-content:space-between;align-items:center}
+.watchall{all:unset;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.02em;color:#fff;background:var(--red);padding:6px 11px;border-radius:99px}
+.cv{position:fixed;inset:0;z-index:20;background:#000;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .2s;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.cv.on{opacity:1;pointer-events:auto}
+.cvtop{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;color:var(--mut);font-size:12px;font-weight:700;letter-spacing:.08em}
+.cvx{all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;background:#1f1f24;color:#fff;display:grid;place-items:center;font-size:15px}
+.cvstage{position:relative;width:100%;aspect-ratio:16/9;background:#000;margin-top:auto}
+.cvstage video{width:100%;height:100%;display:block;background:#000}
+.cvload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--mut);font-size:13px;pointer-events:none}
+.cvload i{width:18px;height:18px;border-radius:50%;border:2px solid #333;border-top-color:var(--red);animation:spin .8s linear infinite}
+.cvload.off{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cvmeta{display:flex;align-items:center;gap:12px;padding:18px 16px 8px}
+.cvmeta b{font-size:17px}.cvmeta .as{font-size:12px;color:var(--mut);margin-top:3px}
+.cvscore{margin-left:auto;font-family:var(--num);font-size:18px;font-weight:600;white-space:nowrap;text-align:right}
+.cvnav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+.cvnav button{all:unset;cursor:pointer;width:46px;height:46px;border-radius:50%;background:#1a1a1e;color:#fff;font-size:26px;display:grid;place-items:center}
+.cvnav button:disabled{opacity:.25;cursor:default}
+.cvdots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:60%}
+.cvdots i{width:7px;height:7px;border-radius:50%;background:#33333b}.cvdots i.on{background:var(--red);transform:scale(1.3)}
+.cvauto{display:flex;gap:8px;align-items:center;justify-content:center;color:var(--mut);font-size:12px;padding:6px 0 18px;margin-bottom:auto}
+
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s;z-index:5}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -396,6 +424,13 @@ svg.bnr.lg{width:38px;height:49px}
  <button data-go="cap"><svg viewBox="0 0 24 24"><path d="M13 3v2.1c2 .4 3.4 1.7 3.6 3.6h-2.3c-.2-1-1.1-1.7-2.6-1.7-1.6 0-2.4.8-2.4 1.7 0 1 .8 1.5 3 2 2.6.6 4.6 1.6 4.6 4.1 0 1.9-1.4 3.2-3.9 3.6V21h-2v-2.1c-2.3-.4-3.9-1.8-4-4h2.3c.2 1.2 1.2 2 3 2 1.9 0 2.6-.9 2.6-1.8 0-1.1-.7-1.6-3-2.2-2.4-.6-4.5-1.5-4.5-3.9 0-1.8 1.4-3.2 3.6-3.6V3z"/></svg><span>Cap</span></button>
  <button data-go="x"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></svg><span>X</span></button>
 </nav>
+<div class="cv" id="cv" aria-hidden="true">
+  <div class="cvtop"><span id="cvcount"></span><button class="cvx" onclick="closeClips()" aria-label="Close">✕</button></div>
+  <div class="cvstage" id="cvstage"><video id="cvv" playsinline controls preload="auto"></video><div class="cvload" id="cvload"><i></i>Loading HD</div></div>
+  <div class="cvmeta"><div class="cvteam" id="cvteam"></div><div><b id="cvtitle"></b><div class="sub" id="cvsub"></div><div class="as" id="cvas"></div></div><div class="cvscore" id="cvscore"></div></div>
+  <div class="cvnav"><button id="cvprev" onclick="stepClip(-1)" aria-label="Previous goal">‹</button><div class="cvdots" id="cvdots"></div><button id="cvnext" onclick="stepClip(1)" aria-label="Next goal">›</button></div>
+  <label class="cvauto"><input type="checkbox" id="cvauto"> Auto-play next goal</label>
+</div>
 <div class="scrim" id="scrim" onclick="closeSheet()"></div>
 <div class="sheet" id="sheet"></div>
 
@@ -556,7 +591,7 @@ async function refresh(){
     if(s){STAND=s; ORDER={}; DIVS.forEach(d=>ORDER[d]=Object.keys(TEAMS).filter(t=>TEAMS[t][1]===d).sort((a,b)=>rank(b)-rank(a)));}
     BOX=null;
     if(LIVEGAME&&LIVEGAME.state!=='pre'){ try{BOX=parseSummary(await getJSON(`${API}/summary?event=${LIVEGAME.id}`))}catch(e){} }
-    LIVE=true; lastOK=new Date();
+    LIVE=true; lastOK=new Date(); loadClips();
   }catch(e){ if(!LIVE)GAMES=snapGames(); }
   render(); schedule();
 }
@@ -643,14 +678,21 @@ function boxHTML(g,b){
 
   // scoring summary
   let gs='', lastP=0, ra=0, rh=0;
+  const CG=clipGame(g), used=new Set(), reel=[];
   for(const goal of b.goals){
     if(goal.team===away)ra++; else if(goal.team===home)rh++;
     if(goal.period!==lastP){lastP=goal.period; gs+=`<div class="per">${goal.period<=3?perName(goal.period).toUpperCase()+' PERIOD':perName(goal.period)}</div>`}
     const [who,...rest]=goal.text.split(/,?\s*assist(?:s|ed by)?:?\s*/i);
     const tag=/power ?play|ppg/i.test(goal.strength+goal.type+goal.text)?'PPG':/short ?handed|shg/i.test(goal.strength+goal.type+goal.text)?'SHG':/empty net|en\b/i.test(goal.strength+goal.type+goal.text)?'EN':'';
-    gs+=`<div class="goal"><div class="tm">${goal.clock}</div>${mark(goal.team,22)}<div style="min-width:0"><b>${esc((who.match(/^.*?\(\d+\)/)||[who])[0])}</b>${tag?`<span class="tag">${tag}</span>`:''}${rest.length?`<div class="as">Assists: ${esc(rest.join(', '))}</div>`:'<div class="as">Unassisted</div>'}</div><div class="sc">${ra}–${rh}</div></div>`;
+    const sc=(who.match(/^.*?\(\d+\)/)||[who])[0];
+    const ci=CG?matchClip(CG,goal,sc,used):-1; let thumb='';
+    if(ci>=0){const c=CG.goals[ci]; reel.push({id:c.clip,title:sc.replace(/\s*\(\d+\)/,''),sub:`${perName(goal.period)} · ${goal.clock}${tag?' · '+tag:''}`,team:goal.team,score:`${away} ${c.as} – ${c.hs} ${home}`,as:rest.join(', ')});
+      thumb=`<button class="cthumb" onclick="event.stopPropagation();openClips(${reel.length-1})" aria-label="Watch goal"><img data-clip="${c.clip}" alt=""><span>▶</span></button>`;}
+    gs+=`<div class="goal"><div class="tm">${goal.clock}</div>${mark(goal.team,22)}<div style="min-width:0"><b>${esc((who.match(/^.*?\(\d+\)/)||[who])[0])}</b>${tag?`<span class="tag">${tag}</span>`:''}${rest.length?`<div class="as">Assists: ${esc(rest.join(', '))}</div>`:'<div class="as">Unassisted</div>'}</div><div class="sc">${ra}–${rh}</div>${thumb}</div>`;
   }
-  h+=`<div class="bx-sec"><h3>SCORING</h3>${gs||'<div class="empty">No goals yet</div>'}</div>`;
+  REEL=reel;
+  h+=`<div class="bx-sec"><h3 class="sch">SCORING${reel.length?`<button class="watchall" onclick="openClips(0,true)">▶ Watch all goals</button>`:''}</h3>${gs||'<div class="empty">No goals yet</div>'}</div>`;
+  setTimeout(hydrateThumbs,0);
   return h;
 }
 
@@ -751,6 +793,7 @@ function showSheet(html){const sh=document.getElementById('sheet');sh.innerHTML=
 function closeSheet(){document.getElementById('sheet').classList.remove('on');document.getElementById('scrim').classList.remove('on')}
 async function openGame(id){
   const g=GAMES.find(x=>x.id===id); if(!g)return;
+  await loadClips(true);
   showSheet(`<div class="box">${boxHTML(g,null)}</div>`);
   try{const b=parseSummary(await getJSON(`${API}/summary?event=${id}`)); showSheet(`<div class="box">${boxHTML(g,b)}</div>`)}catch(e){}
 }
@@ -914,7 +957,7 @@ document.querySelectorAll('#tabbar button').forEach(b=>b.onclick=()=>go(b.datase
 // swipe left/right to change tabs
 let sx=null,sy=null,st=0;
 document.addEventListener('touchstart',e=>{
-  if(e.touches.length!==1||e.target.closest('.sheet,.tabbar,.xembed,input,.capbar'))return sx=null;
+  if(e.touches.length!==1||e.target.closest('.sheet,.tabbar,.xembed,input,.capbar,.cv'))return sx=null;
   sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();},{passive:true});
 document.addEventListener('touchend',e=>{
   if(sx==null)return; const t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy; sx=null;
@@ -1071,6 +1114,82 @@ function renderFontPick(){
 }
 function setNumFont(f){NUMFONT=f;try{localStorage.setItem('ditd-numfont',f)}catch(e){};renderFontPick();renderPlayers();renderCap()}
 document.fonts&&document.fonts.ready.then(()=>{renderPlayers();renderCap()});
+
+/* ---------- Goal clips (NHL video, HD via the NHL's Brightcove player service) ---------- */
+let CLIPS=null, REEL=[], CLIPAT=0, clipsAt=0;
+const BC_ACC='6415718365001', BC_PLAYER='EXtG1xJ7H_default';
+let BC_PK=null; const CLIPSRC={};
+async function loadClips(force){
+  if(!force&&Date.now()-clipsAt<55e3)return; clipsAt=Date.now();
+  for(const u of [`https://raw.githubusercontent.com/${REPO}/main/data/clips.json`,'data/clips.json']){
+    try{const d=await getJSON(u+'?t='+Date.now()); if(d&&d.games){const changed=JSON.stringify(d.games)!==JSON.stringify(CLIPS?.games); CLIPS=d; if(changed)render(); return}}catch(e){}
+  }
+}
+const normName=x=>String(x||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]/g,'');
+function clipGame(g){
+  if(!CLIPS||!g||!g.date)return null;
+  const day=new Date(g.date).toLocaleDateString('en-CA',{timeZone:TZ});
+  return Object.values(CLIPS.games).find(c=>c.date===day&&(c.home===g.opp||c.away===g.opp))||null;
+}
+function matchClip(CG,goal,scorer,used){
+  const last=normName(scorer.replace(/\s*\(\d+\).*$/,'').split(' ').slice(1).join(''));
+  let i=CG.goals.findIndex((c,k)=>!used.has(k)&&c.clip&&c.p===goal.period&&c.team===goal.team&&normName(c.last)===last);
+  if(i<0)i=CG.goals.findIndex((c,k)=>!used.has(k)&&c.clip&&c.p===goal.period&&c.team===goal.team&&last.endsWith(normName(c.last)));
+  if(i>=0)used.add(i); return i;
+}
+async function clipSource(id){
+  if(CLIPSRC[id])return CLIPSRC[id];
+  if(!BC_PK){const cfg=await getJSON(`https://players.brightcove.net/${BC_ACC}/${BC_PLAYER}/config.json`);BC_PK=cfg?.video_cloud?.policy_key;}
+  const r=await fetch(`https://edge.api.brightcove.com/playback/v1/accounts/${BC_ACC}/videos/${id}`,{headers:{Accept:'application/json;pk='+BC_PK}});
+  if(!r.ok)throw new Error(r.status);
+  const j=await r.json();
+  const mp4=(j.sources||[]).filter(x=>x.container==='MP4'&&String(x.src||'').startsWith('https')).sort((a,b)=>(b.height||0)-(a.height||0));
+  const hd=mp4.find(x=>(x.height||0)<=1080)||mp4[0];
+  const hls=(j.sources||[]).find(x=>/mpegurl/i.test(x.type||'')&&String(x.src||'').startsWith('https'));
+  return CLIPSRC[id]={src:(hd||hls||{}).src,poster:j.poster,thumb:j.thumbnail||j.poster};
+}
+function hydrateThumbs(){
+  document.querySelectorAll('img[data-clip]:not([data-done])').forEach(img=>{
+    img.dataset.done=1;
+    clipSource(img.dataset.clip).then(s=>{if(s.thumb){img.onload=()=>img.classList.add('on');img.src=s.thumb}}).catch(()=>{});
+  });
+}
+function openClips(i,all){
+  if(!REEL.length)return;
+  document.getElementById('cvauto').checked=!!all;
+  document.getElementById('cv').classList.add('on');document.getElementById('cv').setAttribute('aria-hidden','false');
+  showClip(i);
+}
+function closeClips(){const v=document.getElementById('cvv');v.pause();v.removeAttribute('src');v.load();document.getElementById('cv').classList.remove('on');document.getElementById('cv').setAttribute('aria-hidden','true')}
+function stepClip(d){const n=CLIPAT+d;if(n>=0&&n<REEL.length)showClip(n)}
+async function showClip(i){
+  document.querySelectorAll('.cvif').forEach(f=>f.remove());
+  CLIPAT=i; const c=REEL[i], v=document.getElementById('cvv'), ld=document.getElementById('cvload');
+  document.getElementById('cvcount').textContent=`GOAL ${i+1} OF ${REEL.length}`;
+  document.getElementById('cvtitle').textContent=c.title;
+  document.getElementById('cvsub').textContent=c.sub;
+  document.getElementById('cvas').textContent=c.as?'Assists: '+c.as:'Unassisted';
+  document.getElementById('cvscore').textContent=c.score;
+  document.getElementById('cvteam').innerHTML=mark(c.team,34);
+  document.getElementById('cvdots').innerHTML=REEL.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('');
+  document.getElementById('cvprev').disabled=i===0; document.getElementById('cvnext').disabled=i===REEL.length-1;
+  ld.classList.remove('off'); v.pause();
+  try{
+    const s=await clipSource(c.id); if(CLIPAT!==i)return;
+    if(!s.src)throw 0;
+    v.poster=s.poster||''; v.src=s.src; v.play().catch(()=>{});
+  }catch(e){ // fall back to the NHL's embedded player
+    v.removeAttribute('src');
+    document.getElementById('cvstage').insertAdjacentHTML('beforeend',`<iframe class="cvif" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen src="https://players.brightcove.net/${BC_ACC}/${BC_PLAYER}/index.html?videoId=${c.id}"></iframe>`);
+  }
+}
+(()=>{const v=document.getElementById('cvv'), ld=document.getElementById('cvload');
+  v.addEventListener('playing',()=>ld.classList.add('off')); v.addEventListener('loadeddata',()=>ld.classList.add('off'));
+  v.addEventListener('ended',()=>{if(document.getElementById('cvauto').checked&&CLIPAT<REEL.length-1)stepClip(1)});
+  const st=document.getElementById('cvstage'); let x0=null;
+  st.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+  st.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>60)stepClip(dx<0?1:-1)},{passive:true});
+})();
 
 /* ---------- Next-game preview ---------- */
 function countdown(d){
