@@ -160,7 +160,7 @@ svg.ic{width:18px;height:18px;display:inline-block;flex:none}
 .pl{display:flex;align-items:center;gap:8px;min-width:0}
 .pl b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:118px;display:block}
 .pl .pos{font-size:10px;color:var(--mut)}
-.jn{width:26px;height:26px;border-radius:50%;background:linear-gradient(145deg,#f74902,#1a1a1e);display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:13px;flex:none;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.18)}
+.jn{width:26px;height:26px;border-radius:50%;background:linear-gradient(145deg,#f74902,#1a1a1e);display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1;letter-spacing:0;text-indent:0;font-family:var(--num);font-weight:700;font-size:13px;flex:none;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.18)}
 .jn.lg{width:44px;height:44px;font-size:20px}
 .more{display:block;width:100%;margin-top:10px;padding:9px;border-radius:10px;background:var(--card2);border:1px solid var(--line);color:var(--mut);font:600 12px Inter;cursor:pointer}
 .lead .who{display:flex;align-items:center;gap:12px}
@@ -242,9 +242,9 @@ body{padding-bottom:calc(env(safe-area-inset-bottom) + 92px)}
 
 
 .lgh{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--mut);margin:4px 0 8px}
-.lg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
-.lg:last-child{margin-bottom:0}
-.lg.skg .lt:first-child{grid-column:span 2}
+.lgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.lgrid:last-child{margin-bottom:0}
+.lgrid.skg .lt:first-child{grid-column:span 2}
 .lt{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 12px}
 .lt .k{font-size:10px;color:var(--otl);font-weight:700;letter-spacing:.08em}
 .lt .lv2{font-family:var(--num);font-size:32px;font-weight:700;line-height:1.1;margin:2px 0 4px}
@@ -508,7 +508,12 @@ const ME='PHI', TZ='America/New_York';
 // ---- Team settings (the only Devils-specific values outside the data blocks) ----
 const SHORT='Flyers', ARENA='Xfinity Mobile Arena · Philadelphia', ESPN_TEAM='phi', NHL_ID=4, NAME_RE=/Philadelphia/i, REPO='watts31/onthefly';
 // Jersey-number badge look: background, number fill, outline colour/width, bottom stripes (or none), number baseline.
-const BADGE={bg:'#f74902',num:'#ffffff',edge:'#000000',ew:2.8,stripes:null,ny:38.5,k:1.25,tl:29};
+// Each of the three apps' team badges (used for that team's players in every app); other teams get initials in team colours.
+const BADGES={
+ NJD:{bg:'#f4f4f5',num:'#ce1126',edge:'#18181b',ew:1.4,stripes:['#ce1126','#18181b','#ce1126'],ny:31.5},
+ WSH:{bg:'#c8102e',num:'#ffffff',edge:'#041e42',ew:2.2,stripes:null,ny:38.5,k:1.25,tl:29},
+ PHI:{bg:'#f74902',num:'#ffffff',edge:'#000000',ew:2.8,stripes:null,ny:38.5,k:1.25,tl:29}};
+let BADGE=BADGES[ME]||BADGES.NJD;
 const TEAMS={
  TBL:['Tampa Bay','Atlantic','#002868'],MTL:['Montréal','Atlantic','#af1e2d'],OTT:['Ottawa','Atlantic','#c52032'],BOS:['Boston','Atlantic','#c99700'],
  FLA:['Florida','Atlantic','#c8102e'],BUF:['Buffalo','Atlantic','#003087'],DET:['Detroit','Atlantic','#ce1126'],TOR:['Toronto','Atlantic','#00205b'],
@@ -934,7 +939,12 @@ const NUMFONTS=[['drawn','Block (drawn)'],['Teko','Teko'],['Big Shoulders Displa
 let NUMFONT='Oswald';
 function fontNum(n,font){const two=String(n).length>1;
   return `<text x="18" y="${BADGE.ny}" text-anchor="middle" font-family="'${font}',sans-serif" font-size="${(two?30:32)*(BADGE.k||1)}" ${two?`textLength="${BADGE.tl||30}" lengthAdjust="spacingAndGlyphs"`:''} fill="${BADGE.num}" stroke="${BADGE.edge}" stroke-width="${BADGE.ew}" stroke-linejoin="round" paint-order="stroke">${n}</text>`}
-const jn=(n,lg,name='',font)=>{
+const jn=(n,lg,name='',font,team)=>{
+  if(team&&team!==ME){
+    if(!BADGES[team]){const c=TEAMS[team]?.[2]||'#3a3a42';
+      return `<span class="jn ${lg?'lg':''}" style="background:${c};box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.22)">${esc(name.split(/[ .]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase())}</span>`}
+    const prev=BADGE; BADGE=BADGES[team]; try{return jn(n,lg,name,font)}finally{BADGE=prev}
+  }
   if(n===''||n==null)return `<span class="jn ${lg?'lg':''}">${esc(name.split(/[ .]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2))}</span>`;
   // Mini "raised to the rafters" banner: red block number with black outline,
   // red/black/red stripes near the bottom, finishing in a band of white.
@@ -969,8 +979,8 @@ function renderPlayers(){
     return `<div class="lt" data-pl="${esc(p.n)}"><div class="ltl"><div class="k">${lab.toUpperCase()}</div><div class="lv2">${fmtv(p[k])}</div><div class="ln">${esc(p.n).replace('. ','.&nbsp;')}</div>${subf?`<div class="sub">${subf(p)}</div>`:''}</div><div class="ltb">${jn(p.num,1,p.n)}</div></div>`;
   };
   document.getElementById('leaders').innerHTML=
-    `<div class="lgh">Skaters</div><div class="lg skg">${SK.map(([l,k,f,sf])=>tile(l,k,f,sf,false,sk)).join('')}</div>`+
-    `<div class="lgh">Goalies</div><div class="lg">${GO.map(([l,k,f,sf,asc])=>tile(l,k,f,sf,asc,k==='w'||k==='so'?gl:qual)).join('')}</div>`;
+    `<div class="lgh">Skaters</div><div class="lgrid skg">${SK.map(([l,k,f,sf])=>tile(l,k,f,sf,false,sk)).join('')}</div>`+
+    `<div class="lgh">Goalies</div><div class="lgrid">${GO.map(([l,k,f,sf,asc])=>tile(l,k,f,sf,asc,k==='w'||k==='so'?gl:qual)).join('')}</div>`;
   document.getElementById('ldasof').textContent=PLAYERS.live?'live':`as of ${SNAP_AS_OF}`;
   // table
   const cols=PCOLS[PVIEW], key=PSORT[PVIEW], asc=key==='gaa';
@@ -1388,7 +1398,7 @@ function playerHTML(p){
   const dr=p.draft?`${p.draft.year} · Rd ${p.draft.round}, #${p.draft.overallPick} overall (${p.draft.teamAbbrev})`:'Undrafted';
   const box=(v,l)=>`<div><b>${v??'–'}</b><span>${l}</span></div>`;
   const f1=v=>v==null?'–':(+v).toFixed(1), f3s=v=>v==null?'–':(+v).toFixed(3).replace(/^0/,''), pctv=v=>v==null?'–':(v*100).toFixed(1)+'%';
-  let h=`<div class="pc-head">${jn(p.num,1,name)}<div><h3>${esc(name)}</h3><div class="sub">#${p.num||'–'} · ${posName} · ${g?'Catches':'Shoots'} ${p.shoots||'–'}${p.team?' · '+p.team:''}</div></div></div>
+  let h=`<div class="pc-head">${jn(p.num,1,name,undefined,p.team||ME)}<div><h3>${esc(name)}</h3><div class="sub">#${p.num||'–'} · ${posName} · ${g?'Catches':'Shoots'} ${p.shoots||'–'}${p.team?' · '+p.team:''}</div></div></div>
   <div class="pc-grid"><div class="stat"><div class="k">Age</div><div class="v">${ageOf(p.born)}</div></div><div class="stat"><div class="k">Height</div><div class="v">${ht(p.h)}</div></div><div class="stat"><div class="k">Weight</div><div class="v">${p.w?p.w+' lb':'–'}</div></div></div>
   <div class="pc-wide"><div class="stat"><div class="k">Born</div><div class="v">${born}<br><span class="sub">${esc(p.place||'')}</span></div></div><div class="stat"><div class="k">Draft</div><div class="v">${dr}</div></div></div>
   ${cap?`<div class="pc-wide" style="grid-template-columns:1fr"><div class="stat"><div class="k">Contract</div><div class="v">${money(cap[3])} cap hit · ${cap[4]} yr${cap[4]>1?'s':''} left (thru ${thru(cap[4])}) · ${cap[5]}${cap[7]?` · ${money(cap[7],1)} from '27-28`:''}</div></div></div>`:''}
