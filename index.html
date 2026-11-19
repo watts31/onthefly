@@ -690,6 +690,14 @@ function boxHTML(g,b){
       thumb=`<button class="cthumb" onclick="event.stopPropagation();openClips(${reel.length-1})" aria-label="Watch goal"><img data-clip="${c.clip}" alt=""><span>▶</span></button>`;}
     gs+=`<div class="goal"><div class="tm">${goal.clock}</div>${mark(goal.team,22)}<div style="min-width:0"><b>${esc((who.match(/^.*?\(\d+\)/)||[who])[0])}</b>${tag?`<span class="tag">${tag}</span>`:''}${rest.length?`<div class="as">Assists: ${esc(rest.join(', '))}</div>`:'<div class="as">Unassisted</div>'}</div><div class="sc">${ra}–${rh}</div>${thumb}</div>`;
   }
+  if(CG&&!reel.length){ // no ESPN goal list to attach to: show the NHL's goals directly
+    let lp=0;
+    for(const c of CG.goals.filter(x=>x.clip)){
+      if(c.p!==lp){lp=c.p; gs+=`<div class="per">${c.p<=3?perName(c.p).toUpperCase()+' PERIOD':perName(c.p)}</div>`}
+      reel.push({id:c.clip,title:`${c.first||''} ${c.last||''}`.trim(),sub:`${perName(c.p)} · ${c.t}`,team:c.team,score:`${away} ${c.as} – ${c.hs} ${home}`,as:''});
+      gs+=`<div class="goal"><div class="tm">${c.t}</div>${mark(c.team,22)}<div style="min-width:0"><b>${esc(`${c.first||''} ${c.last||''}`)}</b></div><div class="sc">${c.as}–${c.hs}</div><button class="cthumb" onclick="event.stopPropagation();openClips(${reel.length-1})" aria-label="Watch goal"><img data-clip="${c.clip}" alt=""><span>▶</span></button></div>`;
+    }
+  }
   REEL=reel;
   h+=`<div class="bx-sec"><h3 class="sch">SCORING${reel.length?`<button class="watchall" onclick="openClips(0,true)">▶ Watch all goals</button>`:''}</h3>${gs||'<div class="empty">No goals yet</div>'}</div>`;
   setTimeout(hydrateThumbs,0);
@@ -1135,6 +1143,8 @@ function matchClip(CG,goal,scorer,used){
   const last=normName(scorer.replace(/\s*\(\d+\).*$/,'').split(' ').slice(1).join(''));
   let i=CG.goals.findIndex((c,k)=>!used.has(k)&&c.clip&&c.p===goal.period&&c.team===goal.team&&normName(c.last)===last);
   if(i<0)i=CG.goals.findIndex((c,k)=>!used.has(k)&&c.clip&&c.p===goal.period&&c.team===goal.team&&last.endsWith(normName(c.last)));
+  // ESPN and the NHL can spell names differently: fall back to the next unused clip for the same period and team.
+  if(i<0)i=CG.goals.findIndex((c,k)=>!used.has(k)&&c.clip&&c.p===goal.period&&c.team===goal.team);
   if(i>=0)used.add(i); return i;
 }
 async function clipSource(id){
