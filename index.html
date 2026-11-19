@@ -336,6 +336,25 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 .tabbar.haslogo .tlogo{display:block}.tabbar.haslogo #thouse{display:none}
 .tabbar button.on .tlogo{background:var(--red)}
 
+
+/* season tab */
+.oddsbig{display:flex;align-items:baseline;gap:10px}
+.oddsbig .num{font-size:52px;font-weight:700;line-height:1}
+.oddsbig .sub{font-size:13px}
+.oddsrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 6px}
+.rk{display:grid;grid-template-columns:1fr auto 52px;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1d1d22}
+.rk:last-child{border:0}
+.rk .l{font-size:13px}.rk .l .bar{height:5px;border-radius:5px;background:#26262c;margin-top:6px;position:relative;overflow:hidden}
+.rk .l .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.rk .v{font-family:var(--num);font-size:18px;font-weight:600;text-align:right}
+.rk .r{font-family:var(--num);font-size:13px;font-weight:700;text-align:center;padding:4px 0;border-radius:7px}
+.rk .sub{font-size:11px}
+.si{display:grid;grid-template-columns:1fr auto 44px;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1d1d22}
+.si:last-child{border:0}
+.si .l{font-size:13px}.si .l .sub{font-size:11px}
+.si .rec{font-family:var(--num);font-size:18px;font-weight:600}
+.si .pct{font-family:var(--num);font-size:13px;text-align:right;color:var(--mut)}
+
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s;z-index:5}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -389,11 +408,23 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
   <table class="tbl" id="picture"></table>
 </div>
 
-<!-- 5. Season -->
+<!-- Playoff odds -->
+<div class="card" id="oddscard">
+  <h2>Playoff odds <small id="oddsrc">MoneyPuck</small></h2>
+  <div id="odds"><div class="sub">Loads live</div></div>
+</div>
+
+<!-- Team stats vs league -->
 <div class="card">
-  <h2>Season, game by game <span id="gp"></span></h2>
-  <div id="strip"></div>
-  <div class="legend"><span><i style="background:var(--win)"></i>Win</span><span><i style="background:var(--loss)"></i>Loss</span><span><i style="background:var(--otl)"></i>OT/SO loss</span><span>Bar height = goal margin</span></div>
+  <h2>Team stats vs the league <small>rank of 32</small></h2>
+  <div id="ranks"><div class="sub">Loads live</div></div>
+</div>
+
+<!-- Situational records -->
+<div class="card">
+  <h2>How they win <small>situational records</small></h2>
+  <div id="situ"><div class="sub">Loads live</div></div>
+</div>
 </div>
 
 <!-- 6. Points pace -->
@@ -761,23 +792,6 @@ function render(){
       return `<div class="row" onclick="openTeam('${t}')">${mark(t,24)}${gs.map(g=>(g.home?house:plane)(colorOf(g.res))).join('')}</div>`;
     }).join('')+'</div>';
   }).join('');
-
-  // season strip
-  document.getElementById('gp').textContent=`${played.length} of ${total}`;
-  const sw=10, H=250, mid=118, u=24;
-  let s=`<svg viewBox="0 0 ${total*sw} ${H}">`;
-  for(const y of [-3,-2,-1,1,2,3]) s+=`<line x1="0" x2="${total*sw}" y1="${mid-y*u}" y2="${mid-y*u}" stroke="#1f1f24" stroke-width="1.5"/>`;
-  s+=`<line x1="0" x2="${total*sw}" y1="${mid}" y2="${mid}" stroke="#2c2c33"/>`;
-  let lastM='';
-  GAMES.forEach((g,i)=>{
-    const x=i*sw;
-    if(g.res){ const m=g.gf!=null?Math.min(4,Math.abs(g.gf-g.ga)):1, hgt=Math.max(m*u,6), y=g.res==='W'?mid-hgt:mid;
-      s+=`<rect x="${x+1.5}" y="${y}" width="${sw-3}" height="${hgt}" rx="1.5" fill="${colorOf(g.res)}"/>`; }
-    else if(g.state==='in') s+=`<circle cx="${x+sw/2}" cy="${mid}" r="5" fill="var(--loss)"/>`;
-    else s+=`<circle cx="${x+sw/2}" cy="${mid}" r="3" fill="${g.home?'#55555e':'none'}" stroke="#55555e" stroke-width="1"/>`;
-    if(g.date){const m=fmt(g.date,{month:'short'}); if(m!==lastM){lastM=m; s+=`<text x="${x+1}" y="${H-2}" fill="#6b6b74" font-size="22" font-family="Inter">${m}</text>`}}
-  });
-  document.getElementById('strip').innerHTML=s+'</svg>';
 
   // points pace
   const PH=300, top=20, maxP=Math.max(110,pts+10), yp=p=>PH-34-(p/maxP)*(PH-34-top), xp=i=>i*(840/total);
@@ -1251,6 +1265,62 @@ async function showClip(i){
   }catch(e){/* keep the house icon */}
 })();
 
+/* ---------- Season tab: playoff odds, league ranks, situational records ---------- */
+let SEASON=null;
+async function loadSeason(){
+  for(const u of [`https://raw.githubusercontent.com/${REPO}/main/data/season.json`,'data/season.json']){
+    try{const d=await getJSON(u+'?t='+Date.now()); if(d&&(d.ranks||d.odds)){SEASON=d;renderSeason();return}}catch(e){}
+  }
+}
+const rankCol=r=>r<=8?'var(--win)':r<=24?'var(--otl)':'var(--loss)';
+const pctS=v=>(v*100).toFixed(v>=.995||v<.005?0:1)+'%';
+function renderSeason(){
+  if(!SEASON)return;
+  // odds
+  const o=SEASON.odds||{}, n=o.now;
+  if(n){
+    const H=o.hist||[], W=840, Ht=230, pad=20, xs=i=>H.length>1?i*(W/(H.length-1)):W/2, ys=v=>Ht-pad-v*(Ht-2*pad);
+    let path=H.map((h,i)=>`${i?'L':'M'}${xs(i).toFixed(1)} ${ys(h[1]).toFixed(1)}`).join(' ');
+    const months=[]; let lm=''; H.forEach((h,i)=>{const m=new Date(h[0]+'T12:00:00Z').toLocaleString('en-US',{month:'short'}); if(m!==lm){lm=m;months.push([i,m])}});
+    const col=n.playoffs>=.5?'var(--win)':'var(--loss)';
+    document.getElementById('odds').innerHTML=`<div class="oddsbig"><span class="num" style="color:${col}">${pctS(n.playoffs)}</span><span class="sub">chance to make the playoffs</span></div>
+     <div class="oddsrow"><div class="stat"><div class="k">Win division</div><div class="v">${pctS(n.div)}</div></div><div class="stat"><div class="k">Win Cup</div><div class="v">${pctS(n.cup)}</div></div><div class="stat"><div class="k">Proj. points</div><div class="v">${Math.round(n.points)}</div></div></div>
+     ${H.length>1?`<svg viewBox="0 0 ${W} ${Ht+26}" style="margin-top:6px">
+       ${[0,.25,.5,.75,1].map(v=>`<line x1="0" x2="${W}" y1="${ys(v)}" y2="${ys(v)}" stroke="${v===.5?'#3a3a42':'#1f1f24'}" ${v===.5?'stroke-dasharray="8 8" stroke-width="2"':''}/><text x="${W-4}" y="${ys(v)-5}" fill="#55555e" font-size="20" text-anchor="end" font-family="Inter">${v*100}%</text>`).join('')}
+       <path d="${path} L${xs(H.length-1)} ${ys(0)} L0 ${ys(0)}Z" fill="var(--red)" opacity=".14"/><path d="${path}" fill="none" stroke="var(--red)" stroke-width="5" stroke-linejoin="round"/>
+       <circle cx="${xs(H.length-1)}" cy="${ys(H[H.length-1][1])}" r="9" fill="#fff"/>
+       ${months.map(([i,m])=>`<text x="${xs(i)+2}" y="${Ht+22}" fill="#6b6b74" font-size="20" font-family="Inter">${m}</text>`).join('')}</svg>`:''}`;
+  }
+  // ranks
+  const R=SEASON.ranks||[];
+  if(R.length) document.getElementById('ranks').innerHTML=R.map(x=>{
+    const val=x.fmt==='pct'?(x.v*100).toFixed(1)+'%':(+x.v).toFixed(x.fmt||2), avg=x.fmt==='pct'?(x.avg*100).toFixed(1)+'%':(+x.avg).toFixed(x.fmt||2);
+    return `<div class="rk"><div class="l">${x.label}<div class="sub">League avg ${avg}</div><div class="bar"><i style="width:${(x.of+1-x.r)/x.of*100}%;background:${rankCol(x.r)}"></i></div></div><div class="v">${val}</div><div class="r" style="background:color-mix(in srgb, ${rankCol(x.r)} 18%, transparent);color:${rankCol(x.r)}">${ord(x.r)}</div></div>`}).join('');
+  // situational records
+  const G=Object.values(SEASON.games||{}).sort((a,b)=>a.date<b.date?-1:1);
+  if(G.length){
+    const res=x=>x.gf>x.ga?'W':(x.end==='REG'?'L':'O');
+    const rec=a=>{const w=a.filter(x=>res(x)==='W').length,l=a.filter(x=>res(x)==='L').length,o=a.filter(x=>res(x)==='O').length;return {t:`${w}-${l}-${o}`,p:a.length?(2*w+o)/(2*a.length):null,n:a.length}};
+    const days=G.map(x=>x.date), b2b=G.filter((x,i)=>i>0&&(new Date(x.date)-new Date(days[i-1]))<=864e5*1.01);
+    const ot=G.filter(x=>x.end!=='REG');
+    const rows=[
+      ['One-goal games','decided by a single goal',G.filter(x=>Math.abs(x.gf-x.ga)===1)],
+      ['Scoring first','when they score the opening goal',G.filter(x=>x.first==='us')],
+      ['Opponent scores first','comeback chances',G.filter(x=>x.first==='them')],
+      ['Leading after 2','ahead going into the 3rd',G.filter(x=>x.a2[0]>x.a2[1])],
+      ['Tied after 2','level going into the 3rd',G.filter(x=>x.a2[0]===x.a2[1])],
+      ['Trailing after 2','behind going into the 3rd',G.filter(x=>x.a2[0]<x.a2[1])],
+      ['Overtime / shootout',`${ot.filter(x=>x.gf>x.ga).length}-${ot.filter(x=>x.gf<x.ga).length} in games past regulation`,ot],
+      ['Back-to-backs','second night of two in a row',b2b],
+      ['Shutouts',`${G.filter(x=>x.ga===0).length} for · ${G.filter(x=>x.gf===0).length} against`,null],
+    ];
+    document.getElementById('situ').innerHTML=rows.map(([l,sub,a])=>{
+      if(!a)return `<div class="si"><div class="l">${l}<div class="sub">${sub}</div></div><div class="rec">${G.filter(x=>x.ga===0).length}</div><div class="pct"></div></div>`;
+      const r=rec(a); return `<div class="si"><div class="l">${l}<div class="sub">${sub}</div></div><div class="rec">${r.n?r.t:'–'}</div><div class="pct" style="color:${r.p==null?'':r.p>=.6?'var(--win)':r.p<.45?'var(--loss)':'var(--mut)'}">${r.p==null?'':Math.round(r.p*100)+'%'}</div></div>`}).join('')
+     +`<div class="sub" style="margin-top:10px">Records are W-L-OTL; % is the share of possible points earned.</div>`;
+  }
+}
+
 /* ---------- Next-game preview ---------- */
 function countdown(d){
   const ms=new Date(d)-Date.now(); if(ms<=0)return 'starting soon';
@@ -1279,7 +1349,7 @@ function previewHTML(g){
 }
 setInterval(()=>{if(!document.hidden)render()},60000);
 
-render(); refresh(); loadPlayers(); loadST(); renderCap(); go(TAB);
+render(); refresh(); loadPlayers(); loadST(); loadSeason(); setInterval(()=>{if(!document.hidden)loadSeason()},900e3); renderCap(); go(TAB);
 if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script>
 </body>
