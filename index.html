@@ -355,6 +355,30 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 .si .rec{font-family:var(--num);font-size:18px;font-weight:600}
 .si .pct{font-family:var(--num);font-size:13px;text-align:right;color:var(--mut)}
 
+
+/* player cards */
+[data-pl]{cursor:pointer}
+.pt tr[data-pl]:active td,.cr[data-pl]:active,.lt[data-pl]:active,.goal[data-pl]:active{background:rgba(255,255,255,.04)}
+.pc-head{display:flex;align-items:center;gap:14px;margin:4px 0 14px}
+.pc-head svg.bnr{width:58px;height:74px}
+.pc-head .jn{width:58px;height:58px;font-size:22px}
+.pc-head h3{font-size:22px;line-height:1.1;margin:0}
+.pc-head .sub{margin-top:4px}
+.pc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:8px}
+.pc-grid .stat .v{font-size:18px}
+.pc-wide{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.pc-wide .stat .v{font-size:14px;font-family:Inter;font-weight:600;line-height:1.35}
+.pc-sec{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--mut);margin:16px 0 8px}
+.pc-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.pc-stats div{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center}
+.pc-stats b{display:block;font-family:var(--num);font-size:20px;font-weight:600}
+.pc-stats span{font-size:9px;color:var(--mut);letter-spacing:.06em;font-weight:700}
+.pc-t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.pc-t th{font-size:10px;color:var(--mut);font-weight:700;letter-spacing:.06em;text-align:right;padding:5px 3px;border-bottom:1px solid var(--line)}
+.pc-t th:first-child,.pc-t td:first-child{text-align:left}
+.pc-t td{font-family:var(--num);font-size:15px;text-align:right;padding:7px 3px;border-bottom:1px solid #1d1d22}
+.pc-t tr:last-child td{border:0}
+
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s;z-index:5}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -733,7 +757,7 @@ function boxHTML(g,b){
     const ci=CG?matchClip(CG,goal,sc,used):-1; let thumb='';
     if(ci>=0){const c=CG.goals[ci]; reel.push({id:c.clip,title:sc.replace(/\s*\(\d+\)/,''),sub:`${perName(goal.period)} · ${goal.clock}${tag?' · '+tag:''}`,team:goal.team,score:`${away} ${c.as} – ${c.hs} ${home}`,as:rest.join(', ')});
       thumb=`<button class="cthumb" onclick="event.stopPropagation();openClips(${reel.length-1})" aria-label="Watch goal"><img data-clip="${c.clip}" alt=""><span>▶</span></button>`;}
-    gs+=`<div class="goal"><div class="tm">${goal.clock}</div>${mark(goal.team,22)}<div style="min-width:0"><b>${esc(sc)}</b>${tag?`<span class="tag">${tag}</span>`:''}${rest.length?`<div class="as">Assists: ${esc(rest.join(', '))}</div>`:'<div class="as">Unassisted</div>'}</div><div class="sc">${ra}–${rh}</div>${thumb}</div>`;
+    gs+=`<div class="goal" data-pl="${esc(sc.replace(/\s*\(\d+\)/,''))}" data-team="${goal.team}"><div class="tm">${goal.clock}</div>${mark(goal.team,22)}<div style="min-width:0"><b>${esc(sc)}</b>${tag?`<span class="tag">${tag}</span>`:''}${rest.length?`<div class="as">Assists: ${esc(rest.join(', '))}</div>`:'<div class="as">Unassisted</div>'}</div><div class="sc">${ra}–${rh}</div>${thumb}</div>`;
   }
   if(CG&&!reel.length){ // no ESPN goal list to attach to: show the NHL's goals directly
     let lp=0;
@@ -942,7 +966,7 @@ function renderPlayers(){
   const tile=(lab,k,fmtv,subf,asc,pool)=>{
     const p=(!known||known[k])?best(pool,k,asc):null;
     if(!p)return `<div class="lt"><div class="k">${lab.toUpperCase()}</div><div class="lv2">–</div><div class="sub">Loads live</div></div>`;
-    return `<div class="lt"><div class="ltl"><div class="k">${lab.toUpperCase()}</div><div class="lv2">${fmtv(p[k])}</div><div class="ln">${esc(p.n).replace('. ','.&nbsp;')}</div>${subf?`<div class="sub">${subf(p)}</div>`:''}</div><div class="ltb">${jn(p.num,1,p.n)}</div></div>`;
+    return `<div class="lt" data-pl="${esc(p.n)}"><div class="ltl"><div class="k">${lab.toUpperCase()}</div><div class="lv2">${fmtv(p[k])}</div><div class="ln">${esc(p.n).replace('. ','.&nbsp;')}</div>${subf?`<div class="sub">${subf(p)}</div>`:''}</div><div class="ltb">${jn(p.num,1,p.n)}</div></div>`;
   };
   document.getElementById('leaders').innerHTML=
     `<div class="lgh">Skaters</div><div class="lg skg">${SK.map(([l,k,f,sf])=>tile(l,k,f,sf,false,sk)).join('')}</div>`+
@@ -954,7 +978,7 @@ function renderPlayers(){
   const total=rows.length; if(!PALL&&PVIEW==='sk')rows=rows.slice(0,10);
   const cell=(p,k)=>k==='sv'?f3(p.sv):k==='gaa'?f2(p.gaa):dash(p[k]);
   let h=`<table class="pt"><tr><th>${PVIEW==='sk'?'Skater':'Goalie'}</th>${cols.map(([k,l])=>`<th class="${k===key?'on':''}" onclick="setSort('${k}')">${l}</th>`).join('')}</tr>`;
-  h+=rows.map(p=>`<tr><td><div class="pl">${jn(p.num,0,p.n)}<div style="min-width:0"><b>${esc(p.n)}</b><span class="pos">${({L:'LW',R:'RW'})[p.pos]||p.pos||''}</span></div></div></td>${cols.map(([k])=>`<td class="${k===key?'on':''}">${cell(p,k)}</td>`).join('')}</tr>`).join('')+'</table>';
+  h+=rows.map(p=>`<tr data-pl="${esc(p.n)}"><td><div class="pl">${jn(p.num,0,p.n)}<div style="min-width:0"><b>${esc(p.n)}</b><span class="pos">${({L:'LW',R:'RW'})[p.pos]||p.pos||''}</span></div></div></td>${cols.map(([k])=>`<td class="${k===key?'on':''}">${cell(p,k)}</td>`).join('')}</tr>`).join('')+'</table>';
   if(PVIEW==='sk'&&total>10)h+=`<button class="more" onclick="PALL=!PALL;renderPlayers()">${PALL?'Show top 10':`Show all ${total} skaters`}</button>`;
   if(!PLAYERS.live)h+=`<div class="sub" style="margin-top:10px">Full roster stats load in the live version.</div>`;
   document.getElementById('ptable').innerHTML=h;
@@ -985,7 +1009,7 @@ function renderCap(){
    <div class="stat"><div class="k">Top 5 share</div><div class="v">${Math.round([...all].sort((a,b)=>b[3]-a[3]).slice(0,5).reduce((t,p)=>t+p[3],0)/CAP.total*100)}%</div></div></div>`;
   for(const [k,label,tot] of [['F','Forwards',f],['D','Defense',d],['G','Goalies',g]]){
     h+=`<div class="ctg"><div class="dh">${label}<span>${money(tot)}</span></div>`+[...CAP[k]].sort((a,b)=>b[3]-a[3]).map(([n,pos,age,hit,yrs,st,note,full])=>
-      `<div class="cr">${jn(NUMS[n]??'',0,n)}<div class="nm"><b>${n}${note?`<span class="st IR">${note}</span>`:''}</b><span>${pos} · ${age} · thru ${thru(yrs)}</span><span class="st ${st}">${st} ${String(2026+yrs).slice(2).padStart(2,"'")}</span>
+      `<div class="cr" data-pl="${esc(n)}">${jn(NUMS[n]??'',0,n)}<div class="nm"><b>${n}${note?`<span class="st IR">${note}</span>`:''}</b><span>${pos} · ${age} · thru ${thru(yrs)}</span><span class="st ${st}">${st} ${String(2026+yrs).slice(2).padStart(2,"'")}</span>
        <div class="yrs">${Array.from({length:8},(_,i)=>`<i class="${i<yrs?'on':''}"></i>`).join('')}</div></div>
        <div class="amt"><b>${money(hit)}</b><span>${yrs} yr${yrs>1?'s':''} left · ${(hit/CAP.limit*100).toFixed(1)}%</span>${full?`<span style="display:block">${money(full,1)} from '27-28</span>`:''}</div></div>`).join('')+'</div>';
   }
@@ -1219,7 +1243,7 @@ async function showClip(i){
   document.querySelectorAll('.cvif').forEach(f=>f.remove());
   CLIPAT=i; const c=REEL[i], v=document.getElementById('cvv'), ld=document.getElementById('cvload');
   document.getElementById('cvcount').textContent=`GOAL ${i+1} OF ${REEL.length}`;
-  document.getElementById('cvtitle').textContent=c.title;
+  document.getElementById('cvtitle').textContent=c.title; document.getElementById('cvtitle').dataset.pl=c.title; document.getElementById('cvtitle').dataset.team=c.team;
   document.getElementById('cvsub').textContent=c.sub;
   document.getElementById('cvas').textContent=c.as?'Assists: '+c.as:'Unassisted';
   document.getElementById('cvscore').textContent=c.score;
@@ -1321,6 +1345,60 @@ function renderSeason(){
   }
 }
 
+/* ---------- Player cards (data refreshed daily by the bios job) ---------- */
+let BIOS=null, BIOIDX={};
+async function loadBios(){
+  for(const u of [`https://raw.githubusercontent.com/${REPO}/main/data/bios.json`,'data/bios.json']){
+    try{const d=await getJSON(u+'?t='+Date.now()); if(d&&d.players){BIOS=d; BIOIDX={};
+      for(const p of Object.values(d.players)){const f=p.first||'',l=p.last||'';
+        for(const k of [normName(f+l),normName((f[0]||'')+l)]) if(k&&!BIOIDX[k])BIOIDX[k]=p;}
+      return}}catch(e){}
+  }
+}
+function findPlayer(name){if(!BIOS||!name)return null; const k=normName(String(name).replace(/\s*\(\d+\).*$/,'')); return BIOIDX[k]||null}
+document.addEventListener('click',e=>{
+  if(e.target.closest('.cthumb,button,a,.seg,th'))return;
+  const el=e.target.closest('[data-pl]'); if(!el)return;
+  if(el.dataset.team&&el.dataset.team!==ME)return; // only our own team's players have cards
+  const p=findPlayer(el.dataset.pl); if(!p)return;
+  if(document.getElementById('cv').classList.contains('on')){hideClips(); if(history.state?.layer==='clips')history.replaceState({layer:'sheet'},'')}
+  showSheet(playerHTML(p));
+});
+const ageOf=b=>{if(!b)return '–';const d=new Date(b+'T12:00:00Z'),t=new Date();let a=t.getFullYear()-d.getFullYear();if(t<new Date(t.getFullYear(),d.getMonth(),d.getDate()))a--;return a};
+const ht=i=>i?`${Math.floor(i/12)}′${i%12}″`:'–';
+const sn=x=>{x=String(x);return `${x.slice(0,4)}-${x.slice(6)}`};
+function playerHTML(p){
+  const g=p.pos==='G', S=p.season||{}, C=p.career||{}, name=`${p.first||''} ${p.last||''}`.trim();
+  const posName={C:'Center',L:'Left wing',R:'Right wing',D:'Defense',G:'Goalie'}[p.pos]||p.pos;
+  const cap=[...CAP.F,...CAP.D,...CAP.G].find(r=>normName(r[0])===normName(name));
+  const born=p.born?new Date(p.born+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'–';
+  const dr=p.draft?`${p.draft.year} · Rd ${p.draft.round}, #${p.draft.overallPick} overall (${p.draft.teamAbbrev})`:'Undrafted';
+  const box=(v,l)=>`<div><b>${v??'–'}</b><span>${l}</span></div>`;
+  const f1=v=>v==null?'–':(+v).toFixed(1), f3s=v=>v==null?'–':(+v).toFixed(3).replace(/^0/,''), pctv=v=>v==null?'–':(v*100).toFixed(1)+'%';
+  let h=`<div class="pc-head">${jn(p.num,1,name)}<div><h3>${esc(name)}</h3><div class="sub">#${p.num||'–'} · ${posName} · ${g?'Catches':'Shoots'} ${p.shoots||'–'}${p.team?' · '+p.team:''}</div></div></div>
+  <div class="pc-grid"><div class="stat"><div class="k">Age</div><div class="v">${ageOf(p.born)}</div></div><div class="stat"><div class="k">Height</div><div class="v">${ht(p.h)}</div></div><div class="stat"><div class="k">Weight</div><div class="v">${p.w?p.w+' lb':'–'}</div></div></div>
+  <div class="pc-wide"><div class="stat"><div class="k">Born</div><div class="v">${born}<br><span class="sub">${esc(p.place||'')}</span></div></div><div class="stat"><div class="k">Draft</div><div class="v">${dr}</div></div></div>
+  ${cap?`<div class="pc-wide" style="grid-template-columns:1fr"><div class="stat"><div class="k">Contract</div><div class="v">${money(cap[3])} cap hit · ${cap[4]} yr${cap[4]>1?'s':''} left (thru ${thru(cap[4])}) · ${cap[5]}${cap[7]?` · ${money(cap[7],1)} from '27-28`:''}</div></div></div>`:''}
+  <div class="pc-sec">THIS SEASON</div>`;
+  h+= g ? `<div class="pc-stats">${box(S.gamesPlayed,'GP')}${box(S.wins,'W')}${box(S.losses,'L')}${box(S.otLosses,'OTL')}${box(S.shutouts,'SO')}</div>
+       <div class="pc-stats" style="grid-template-columns:repeat(2,1fr);margin-top:6px">${box(S.goalsAgainstAvg!=null?(+S.goalsAgainstAvg).toFixed(2):null,'GAA')}${box(f3s(S.savePctg),'SAVE %')}</div>`
+     : `<div class="pc-stats">${box(S.gamesPlayed,'GP')}${box(S.goals,'G')}${box(S.assists,'A')}${box(S.points,'PTS')}${box(S.plusMinus!=null?(S.plusMinus>0?'+':'')+S.plusMinus:null,'+/-')}</div>
+       <div class="pc-stats" style="margin-top:6px">${box(S.pim,'PIM')}${box(S.powerPlayGoals,'PPG')}${box(S.shots,'SOG')}${box(pctv(S.shootingPctg),'SH%')}${box(p.toi,'TOI')}</div>`;
+  if(p.last5&&p.last5.length){
+    h+=`<div class="pc-sec">LAST 5 GAMES</div><table class="pc-t"><tr><th>Date</th>${g?'<th>Dec</th><th>GA</th><th>SV%</th>':'<th>G</th><th>A</th><th>PTS</th><th>TOI</th>'}</tr>`+
+      p.last5.map(x=>`<tr><td>${new Date(x.d+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric'})} <span class="sub">${x.h==='H'?'vs':'@'} ${x.o}</span></td>${g?`<td>${x.dec||'–'}</td><td>${x.ga??'–'}</td><td>${f3s(x.sv)}</td>`:`<td>${x.g??0}</td><td>${x.a??0}</td><td>${x.p??0}</td><td>${x.toi||'–'}</td>`}</tr>`).join('')+'</table>';
+  }
+  h+=`<div class="pc-sec">CAREER (NHL REGULAR SEASON)</div>`+(g
+    ? `<div class="pc-stats">${box(C.gamesPlayed,'GP')}${box(C.wins,'W')}${box(C.goalsAgainstAvg!=null?(+C.goalsAgainstAvg).toFixed(2):null,'GAA')}${box(f3s(C.savePctg),'SV%')}${box(C.shutouts,'SO')}</div>`
+    : `<div class="pc-stats">${box(C.gamesPlayed,'GP')}${box(C.goals,'G')}${box(C.assists,'A')}${box(C.points,'PTS')}${box(C.plusMinus!=null?(C.plusMinus>0?'+':'')+C.plusMinus:null,'+/-')}</div>`);
+  if(p.past&&p.past.length){
+    h+=`<table class="pc-t" style="margin-top:10px"><tr><th>Season</th><th>GP</th>${g?'<th>W</th><th>GAA</th><th>SV%</th>':'<th>G</th><th>A</th><th>PTS</th>'}</tr>`+
+      p.past.map(x=>`<tr><td>${sn(x.s)} <span class="sub">${esc((x.t||'').split(' ').pop())}</span></td><td>${x.gp??'–'}</td>${g?`<td>${x.w??'–'}</td><td>${x.gaa!=null?(+x.gaa).toFixed(2):'–'}</td><td>${f3s(x.sv)}</td>`:`<td>${x.g??'–'}</td><td>${x.a??'–'}</td><td>${x.p??'–'}</td>`}</tr>`).join('')+'</table>';
+  }
+  h+=`<div class="sub" style="margin-top:14px">Player data updates daily${BIOS?.updated?' · last '+new Date(BIOS.updated).toLocaleDateString('en-US',{month:'short',day:'numeric'}):''}.</div>`;
+  return h;
+}
+
 /* ---------- Next-game preview ---------- */
 function countdown(d){
   const ms=new Date(d)-Date.now(); if(ms<=0)return 'starting soon';
@@ -1349,7 +1427,7 @@ function previewHTML(g){
 }
 setInterval(()=>{if(!document.hidden)render()},60000);
 
-render(); refresh(); loadPlayers(); loadST(); loadSeason(); setInterval(()=>{if(!document.hidden)loadSeason()},900e3); renderCap(); go(TAB);
+render(); refresh(); loadPlayers(); loadST(); loadSeason(); loadBios(); setInterval(()=>{if(!document.hidden){loadSeason();loadBios()}},900e3); renderCap(); go(TAB);
 if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script>
 </body>
