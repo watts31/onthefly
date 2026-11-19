@@ -5,23 +5,32 @@ const TEAM = 'PHI';
 const get = async (u) => { const r = await fetch(u, { headers: { 'User-Agent': 'player-cards (personal app)' } }); if (!r.ok) throw new Error(`${r.status} ${u}`); return r.json(); };
 const now = new Date(), y = now.getUTCFullYear();
 const sid = now.getUTCMonth() >= 8 ? `${y}${y + 1}` : `${y - 1}${y}`;
-const roster = await get(`https://api-web.nhle.com/v1/roster/${TEAM}/current`);
-const club = await get(`https://api-web.nhle.com/v1/club-stats/${TEAM}/${sid}/2`).catch(() => ({}));
-const ids = new Set();
-for (const k of ['forwards', 'defensemen', 'goalies']) for (const p of roster[k] || []) ids.add(p.id);
-for (const p of [...(club.skaters || []), ...(club.goalies || [])]) ids.add(p.playerId);
-const out = { season: sid, players: {} };
 const pick = (o, ks) => Object.fromEntries(ks.filter((k) => o?.[k] != null).map((k) => [k, o[k]]));
 const SK = ['gamesPlayed', 'goals', 'assists', 'points', 'plusMinus', 'pim', 'powerPlayGoals', 'gameWinningGoals', 'shots', 'shootingPctg'];
 const GK = ['gamesPlayed', 'wins', 'losses', 'otLosses', 'goalsAgainstAvg', 'savePctg', 'shutouts'];
-for (const id of ids) {
-  try {
-    const L = await get(`https://api-web.nhle.com/v1/player/${id}/landing`);
+async function buildTeam(TEAMX) {
+  const roster = await get(`https://api-web.nhle.com/v1/roster/${TEAMX}/current`);
+  const club = await get(`https://api-web.nhle.com/v1/club-stats/${TEAMX}/${sid}/2`).catch(() => ({}));
+  const ids = new Set();
+  for (const k of ['forwards', 'defensemen', 'goalies']) for (const p of roster[k] || []) ids.add(p.id);
+  if (TEAMX === TEAM) for (const p of [...(club.skaters || []), ...(club.goalies || [])]) ids.add(p.playerId);
+  const out = { season: sid, team: TEAMX, players: {} };
+  const list = [...ids];
+  const one = async (id) => {
+    try {
+      const L = await get(`https://api-web.nhle.com/v1/player/${id}/landing`);
+      out.players[id] = card(L);
+    } catch (e) { console.warn(TEAMX, id, e.message); }
+  };
+  for (let i = 0; i < list.length; i += 4) await Promise.all(list.slice(i, i + 4).map(one));
+  return out;
+}
+function card(L) {
     const g = L.position === 'G', keys = g ? GK : SK;
     const totals = (L.seasonTotals || []).filter((s) => s.leagueAbbrev === 'NHL' && s.gameTypeId === 2);
     const cur = totals.filter((s) => String(s.season) === sid);
-    out.players[id] = {
-      id, first: L.firstName?.default, last: L.lastName?.default, num: L.sweaterNumber ?? '', pos: L.position,
+    return {
+      id: L.playerId, first: L.firstName?.default, last: L.lastName?.default, num: L.sweaterNumber ?? '', pos: L.position,
       shoots: L.shootsCatches, h: L.heightInInches, w: L.weightInPounds, born: L.birthDate,
       place: [L.birthCity?.default, L.birthStateProvince?.default, L.birthCountry].filter(Boolean).join(', '),
       draft: L.draftDetails ? pick(L.draftDetails, ['year', 'teamAbbrev', 'round', 'pickInRound', 'overallPick']) : null,
@@ -36,11 +45,22 @@ for (const id of ids) {
         ? { s: s.season, t: s.teamName?.default, gp: s.gamesPlayed, w: s.wins, gaa: s.goalsAgainstAvg, sv: s.savePctg }
         : { s: s.season, t: s.teamName?.default, gp: s.gamesPlayed, g: s.goals, a: s.assists, p: s.points }),
     };
-  } catch (e) { console.warn(id, e.message); }
 }
+const save = (file, data) => {
+  let old = null; try { old = JSON.parse(readFileSync(file, 'utf8')); delete old.updated; } catch {}
+  if (JSON.stringify(old) === JSON.stringify(data)) return false;
+  writeFileSync(file, JSON.stringify({ updated: now.toISOString(), ...data })); return true;
+};
+mkdirSync('data/bios', { recursive: true });
+// our team first (main file), then every other team (one file each, loaded only when you tap an opponent)
+const out = await buildTeam(TEAM);
 if (!Object.keys(out.players).length) throw new Error('No players fetched; keeping the previous file.');
-let old = null; try { old = JSON.parse(readFileSync('data/bios.json', 'utf8')); delete old.updated; } catch {}
-if (JSON.stringify(old) === JSON.stringify(out)) { console.log('No changes.'); process.exit(0); }
-mkdirSync('data', { recursive: true });
-writeFileSync('data/bios.json', JSON.stringify({ updated: now.toISOString(), ...out }));
-console.log('Saved', Object.keys(out.players).length, 'players');
+console.log(TEAM, Object.keys(out.players).length, 'players', save('data/bios.json', out) ? 'saved' : 'unchanged');
+const st = await get('https://api-web.nhle.com/v1/standings/now').catch(() => ({ standings: [] }));
+const all = [...new Set((st.standings || []).map((t) => t.teamAbbrev?.default || t.teamAbbrev).filter(Boolean))];
+for (const T of all) {
+  try {
+    const o = T === TEAM ? out : await buildTeam(T);
+    if (Object.keys(o.players).length) console.log(T, Object.keys(o.players).length, save(`data/bios/${T}.json`, o) ? 'saved' : 'unchanged');
+  } catch (e) { console.warn(T, e.message); }
+}

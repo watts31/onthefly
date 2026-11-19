@@ -764,7 +764,7 @@ function boxHTML(g,b){
     for(const c of CG.goals.filter(x=>x.clip)){
       if(c.p!==lp){lp=c.p; gs+=`<div class="per">${c.p<=3?perName(c.p).toUpperCase()+' PERIOD':perName(c.p)}</div>`}
       reel.push({id:c.clip,title:`${c.first||''} ${c.last||''}`.trim(),sub:`${perName(c.p)} · ${c.t}`,team:c.team,score:`${away} ${c.as} – ${c.hs} ${home}`,as:''});
-      gs+=`<div class="goal"><div class="tm">${c.t}</div>${mark(c.team,22)}<div style="min-width:0"><b>${esc(`${c.first||''} ${c.last||''}`)}</b></div><div class="sc">${c.as}–${c.hs}</div><button class="cthumb" onclick="event.stopPropagation();openClips(${reel.length-1})" aria-label="Watch goal"><img data-clip="${c.clip}" alt=""><span>▶</span></button></div>`;
+      gs+=`<div class="goal" data-pl="${esc(`${c.first||''} ${c.last||''}`.trim())}" data-team="${c.team}"><div class="tm">${c.t}</div>${mark(c.team,22)}<div style="min-width:0"><b>${esc(`${c.first||''} ${c.last||''}`)}</b></div><div class="sc">${c.as}–${c.hs}</div><button class="cthumb" onclick="event.stopPropagation();openClips(${reel.length-1})" aria-label="Watch goal"><img data-clip="${c.clip}" alt=""><span>▶</span></button></div>`;
     }
   }
   REEL=reel;
@@ -1356,11 +1356,24 @@ async function loadBios(){
   }
 }
 function findPlayer(name){if(!BIOS||!name)return null; const k=normName(String(name).replace(/\s*\(\d+\).*$/,'')); return BIOIDX[k]||null}
-document.addEventListener('click',e=>{
+const TEAMBIOS={};
+async function teamBios(T){ // other teams' cards: one small file per team, loaded only when needed
+  if(TEAMBIOS[T])return TEAMBIOS[T];
+  for(const u of [`https://raw.githubusercontent.com/${REPO}/main/data/bios/${T}.json`,`data/bios/${T}.json`]){
+    try{const d=await getJSON(u); if(d&&d.players){const idx={};
+      for(const p of Object.values(d.players)){const f=p.first||'',l=p.last||''; for(const k of [normName(f+l),normName((f[0]||'')+l)]) if(k&&!idx[k])idx[k]=p;}
+      return TEAMBIOS[T]=idx}}catch(e){}
+  }
+  return TEAMBIOS[T]={};
+}
+document.addEventListener('click',async e=>{
   if(e.target.closest('.cthumb,button,a,.seg,th'))return;
   const el=e.target.closest('[data-pl]'); if(!el)return;
-  if(el.dataset.team&&el.dataset.team!==ME)return; // only our own team's players have cards
-  const p=findPlayer(el.dataset.pl); if(!p)return;
+  let p=null;
+  if(el.dataset.team&&el.dataset.team!==ME){
+    const idx=await teamBios(el.dataset.team); p=idx[normName(String(el.dataset.pl).replace(/\s*\(\d+\).*$/,''))]||null;
+  } else p=findPlayer(el.dataset.pl);
+  if(!p)return;
   if(document.getElementById('cv').classList.contains('on')){hideClips(); if(history.state?.layer==='clips')history.replaceState({layer:'sheet'},'')}
   showSheet(playerHTML(p));
 });
