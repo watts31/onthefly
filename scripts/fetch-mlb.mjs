@@ -38,7 +38,7 @@ out.ranks = [
 // games (regular season + postseason) with linescores -> results + situational records
 const sched = async (q) => ((await get(`/schedule?sportId=1&teamId=${TEAM_ID}&${q}&hydrate=linescore,team`)).dates || []).flatMap((d) => d.games);
 const mapGame = (g) => { const home = g.teams.home.team.id === TEAM_ID, us = home ? g.teams.home : g.teams.away, them = home ? g.teams.away : g.teams.home;
-  const inn = (g.linescore?.innings || []).map((i) => [home ? i.home?.runs ?? 0 : i.away?.runs ?? 0, home ? i.away?.runs ?? 0 : i.home?.runs ?? 0]);
+  const inn = (g.linescore?.innings || []).map((i) => [home ? i.home?.runs ?? null : i.away?.runs ?? 0, home ? i.away?.runs ?? 0 : i.home?.runs ?? null]);
   return { pk: g.gamePk, date: g.officialDate || g.gameDate?.slice(0, 10), t: g.gameDate, type: g.gameType, opp: ab[them.team.id] || them.team.abbreviation, home,
     rs: us.score ?? null, ra: them.score ?? null, state: g.status?.abstractGameState, desc: g.seriesDescription || '', inn,
     h: [g.linescore?.teams?.[home ? 'home' : 'away']?.hits, g.linescore?.teams?.[home ? 'away' : 'home']?.hits],
@@ -52,6 +52,9 @@ const roster = (await get(`/teams/${TEAM_ID}/roster?rosterType=40Man&season=${ne
 const ids = roster.map((r) => r.person.id);
 const ppl = ids.length ? (await get(`/people?personIds=${ids.join(',')}&hydrate=stats(group=[hitting,pitching],type=[season,career,yearByYear],season=${season})`)).people || [] : [];
 const grab = (p, group, type) => (p.stats || []).find((s) => s.group?.displayName === group && s.type?.displayName === type);
+const HK = ['gamesPlayed', 'atBats', 'runs', 'hits', 'doubles', 'triples', 'homeRuns', 'rbi', 'baseOnBalls', 'strikeOuts', 'stolenBases', 'avg', 'obp', 'slg', 'ops', 'plateAppearances'];
+const PK = ['gamesPlayed', 'gamesStarted', 'wins', 'losses', 'saves', 'holds', 'inningsPitched', 'strikeOuts', 'baseOnBalls', 'era', 'whip', 'strikeoutsPer9Inn'];
+const trim = (o, isP) => Object.fromEntries((isP ? PK : HK).filter((k) => o?.[k] != null).map((k) => [k, o[k]]));
 out.players = ppl.map((p) => {
   const pos = p.primaryPosition?.abbreviation, isP = ['P', 'SP', 'RP', 'TWP'].includes(pos) || p.primaryPosition?.type === 'Pitcher';
   const g = isP ? 'pitching' : 'hitting';
@@ -61,8 +64,8 @@ out.players = ppl.map((p) => {
   return { id: p.id, name: p.fullName, first: p.useName || p.firstName, last: p.lastName, num: r?.jerseyNumber || p.primaryNumber || '', pos, isP,
     bats: p.batSide?.code, throws: p.pitchHand?.code, born: p.birthDate, h: p.height, w: p.weight,
     place: [p.birthCity, p.birthStateProvince, p.birthCountry].filter(Boolean).join(', '), draft: p.draftYear || null, debut: p.mlbDebutDate || null,
-    s: seasonS, c: careerS,
-    past: yby.slice(-5).reverse().map((y) => ({ yr: y.season, t: y.team?.abbreviation || y.team?.name || '', s: y.stat })) };
+    s: trim(seasonS, isP), c: trim(careerS, isP),
+    past: yby.slice(-5).reverse().map((y) => ({ yr: y.season, t: y.team?.abbreviation || y.team?.name || '', s: trim(y.stat, isP) })) };
 });
 mkdirSync('data', { recursive: true });
 let old = null; try { old = JSON.parse(readFileSync('data/mlb.json', 'utf8')); delete old.updated; } catch {}

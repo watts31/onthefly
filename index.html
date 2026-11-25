@@ -379,6 +379,14 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 .pc-t td{font-family:var(--num);font-size:15px;text-align:right;padding:7px 3px;border-bottom:1px solid #1d1d22}
 .pc-t tr:last-child td{border:0}
 
+
+/* team switch (On the Fly: Flyers | Phillies) */
+.tswitch{display:none;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:3px;margin:-2px 0 12px}
+.tswitch.show,.tswitch:not(:empty){display:flex}
+.tswitch a{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 6px;border-radius:9px;color:var(--mut);font-size:13px;font-weight:700;text-decoration:none}
+.tswitch a img{width:20px;height:20px;object-fit:contain;filter:grayscale(1) opacity(.6)}
+.tswitch a.on{background:#2a2a31;color:#fff}.tswitch a.on img{filter:none}
+
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s;z-index:5}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -396,6 +404,7 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
   <div class="pill" id="pill" onclick="refresh()"><span class="dot"></span><span id="pilltxt">Loading…</span></div>
 </div>
 
+<div class="tswitch" id="tswitch"></div>
 <section class="tab" data-tab="home">
 <!-- 2. Record -->
 <div class="card hero">
@@ -514,6 +523,7 @@ const BADGES={
  WSH:{bg:'#c8102e',num:'#ffffff',edge:'#041e42',ew:2.2,stripes:null,ny:38.5,k:1.25,tl:29},
  PHI:{bg:'#f74902',num:'#ffffff',edge:'#000000',ew:2.8,stripes:null,ny:38.5,k:1.25,tl:29}};
 let BADGE=BADGES[ME]||BADGES.NJD;
+const SWITCH=[['Flyers','index.html','https://a.espncdn.com/i/teamlogos/nhl/500/phi.png'],['Phillies','phillies.html','https://a.espncdn.com/i/teamlogos/mlb/500/phi.png']]; // [[label, href, logo], ...] — only On the Fly uses this
 const TEAMS={
  TBL:['Tampa Bay','Atlantic','#002868'],MTL:['Montréal','Atlantic','#af1e2d'],OTT:['Ottawa','Atlantic','#c52032'],BOS:['Boston','Atlantic','#c99700'],
  FLA:['Florida','Atlantic','#c8102e'],BUF:['Buffalo','Atlantic','#003087'],DET:['Detroit','Atlantic','#ce1126'],TOR:['Toronto','Atlantic','#00205b'],
@@ -1421,6 +1431,8 @@ function playerHTML(p){
   h+=`<div class="sub" style="margin-top:14px">Player data updates daily${BIOS?.updated?' · last '+new Date(BIOS.updated).toLocaleDateString('en-US',{month:'short',day:'numeric'}):''}.</div>`;
   return h;
 }
+
+if(SWITCH)document.getElementById('tswitch').innerHTML=SWITCH.map(([l,h,img],i)=>`<a class="${i===0?'on':''}" href="${h}"><img src="${img}" alt="">${l}</a>`).join('');
 
 /* ---------- Next-game preview ---------- */
 function countdown(d){
