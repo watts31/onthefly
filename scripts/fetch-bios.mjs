@@ -58,9 +58,13 @@ if (!Object.keys(out.players).length) throw new Error('No players fetched; keepi
 console.log(TEAM, Object.keys(out.players).length, 'players', save('data/bios.json', out) ? 'saved' : 'unchanged');
 const st = await get('https://api-web.nhle.com/v1/standings/now').catch(() => ({ standings: [] }));
 const all = [...new Set((st.standings || []).map((t) => t.teamAbbrev?.default || t.teamAbbrev).filter(Boolean))];
+const index = [];
 for (const T of all) {
   try {
     const o = T === TEAM ? out : await buildTeam(T);
     if (Object.keys(o.players).length) console.log(T, Object.keys(o.players).length, save(`data/bios/${T}.json`, o) ? 'saved' : 'unchanged');
+    for (const p of Object.values(o.players)) index.push([p.id, `${p.first} ${p.last}`, T, p.pos]);
   } catch (e) { console.warn(T, e.message); }
 }
+// small search list of every player in the league, for the Compare page
+if (index.length > 500) console.log('index', save('data/bios/index.json', { season: sid, players: index.sort((a, b) => a[1].localeCompare(b[1])) }) ? 'saved' : 'unchanged');

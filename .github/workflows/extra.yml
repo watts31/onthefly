@@ -1,0 +1,28 @@
+name: Update news, prospects and history
+on:
+  schedule:
+    - cron: '43 */4 * * *'   # every 4 hours
+  workflow_dispatch:
+  push:
+    paths: ['scripts/fetch-extra.mjs', '.github/workflows/extra.yml']
+permissions:
+  contents: write
+concurrency: extra
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/fetch-extra.mjs
+      - name: Save if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/extra.json data/schedule.ics 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git commit -m "Update news, prospects and history"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
