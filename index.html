@@ -557,7 +557,7 @@ html.light .chip{color:#fff}
 .sres b{flex:1;font-size:14.5px;font-weight:600}.sres small{font-size:12px;color:var(--mut)}
 .afl{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.afl:last-child{border:0}
 .afl b{font-size:14.5px}.afl small{font-size:11.5px;color:var(--mut)}.afl .rec{font-family:var(--num);font-size:18px;text-align:right}
-html.light .sch-m,html.light .nseg{background:var(--bg)}
+html.light .nseg{background:var(--bg)}
 
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s;z-index:5}
@@ -1359,8 +1359,9 @@ function schSet(k,v){if(k==='f')SCHF=v;else SCHHA=v;renderSchedule()}
 function renderSchedule(){
   if(!xel('sched'))return;
   const G=XT.games(), done=g=>!!g.res, rem=G.filter(g=>!done(g));
-  const played=G.filter(done), homeLeft=rem.filter(g=>g.home).length;
-  xel('schsum').innerHTML=[['Played',played.length],['Left',rem.length],['Home left',homeLeft],['Road left',rem.length-homeLeft]].map(([k,v])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  const cur=rem[0]?.yr??G[G.length-1]?.yr, inS=g=>g.yr==null||g.yr===cur;
+  const played=G.filter(g=>done(g)&&inS(g)), homeLeft=rem.filter(g=>g.home&&inS(g)).length, remN=rem.filter(inS).length;
+  xel('schsum').innerHTML=[['Played',played.length],['Left',remN],['Home left',homeLeft],['Road left',remN-homeLeft]].map(([k,v])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
   xel('schfilt').innerHTML=xseg([['up','Upcoming'],['res','Results'],['all','All']],SCHF,"schSet.bind(null,'f')")+xseg([['all','All'],['home','Home'],['away','Away']],SCHHA,"schSet.bind(null,'h')");
   let list=G.filter(g=>SCHF==='all'||(SCHF==='up'?!done(g):done(g)));
   if(SCHHA!=='all')list=list.filter(g=>SCHHA==='home'?g.home:!g.home);
@@ -1419,7 +1420,8 @@ async function cmpPick(slot){
 function cmpSearch(slot,q){
   const n=s=>String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
   q=n(q.trim());
-  const list=(CMPIDX||[]).filter(p=>q?n(p[1]).includes(q):p[2]===XT.me).slice(0,50);
+  const sc=p=>{const nm=n(p[1]);return nm.startsWith(q)?0:nm.split(/[\s.'-]+/).some(w=>w.startsWith(q))?1:2};
+  const list=(CMPIDX||[]).filter(p=>q?n(p[1]).includes(q):p[2]===XT.me).sort((a,b)=>q?sc(a)-sc(b):0).slice(0,50);
   xel('csr').innerHTML=(q?'':`<div class="sub" style="margin:4px 2px 6px">${XT.short} · type to search every team</div>`)+list.map(p=>`<div class="sres" onclick="cmpChoose(${slot},'${p[0]}')">${XT.mark(p[2],24)}<b>${esc(p[1])}</b><small>${esc(XT.posName(p[3]))}</small></div>`).join('')||'<div class="empty">No matches</div>';
 }
 async function cmpChoose(slot,id){
