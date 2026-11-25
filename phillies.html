@@ -387,6 +387,80 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 .tswitch a img{width:20px;height:20px;object-fit:contain;filter:grayscale(1) opacity(.6)}
 .tswitch a.on{background:#2a2a31;color:#fff}.tswitch a.on img{filter:none}
 
+/* ---------- Settings ---------- */
+.topr{display:flex;align-items:center;gap:8px}
+.gear{all:unset;cursor:pointer;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--card2);border:1px solid var(--line);color:var(--mut);transition:transform .25s}
+.gear:active{transform:rotate(40deg) scale(.94)}
+.gear svg{width:16px;height:16px;fill:currentColor}
+.st-h{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:2px 0 14px}
+.st-g{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--mut);text-transform:uppercase;margin:20px 4px 7px}
+.st-f{font-size:12px;color:var(--mut);margin:7px 4px 0;line-height:1.45}
+.st-list{background:var(--card2);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.st-r{display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 14px;border-top:1px solid var(--line)}
+.st-r:first-child{border-top:0}
+.st-r .lab{flex:1;min-width:0;font-size:15px;font-weight:500}
+.st-r .lab small{display:block;font-size:12px;color:var(--mut);font-weight:400;margin-top:2px}
+.st-r.off{opacity:.45}
+.st-ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex:none;color:#fff}
+.st-ic svg{width:16px;height:16px;fill:currentColor}
+.sw{position:relative;width:51px;height:31px;flex:none;border-radius:99px;background:var(--rest);transition:background .2s;cursor:pointer}
+.sw:after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.3);transition:transform .22s cubic-bezier(.3,.8,.3,1)}
+.sw.on{background:var(--win)}.sw.on:after{transform:translateX(20px)}
+.sg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:2px;gap:2px}
+.sg button{all:unset;cursor:pointer;flex:1;text-align:center;font-size:13px;font-weight:600;color:var(--mut);padding:7px 8px;border-radius:8px;white-space:nowrap}
+.sg button.on{background:var(--card);color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.st-full{padding:10px 14px 12px}.st-full .lab{margin-bottom:9px}
+.sws{display:flex;gap:10px;flex-wrap:wrap}
+.swc{all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.swc.on:after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--txt)}
+.bgs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.bgc{all:unset;cursor:pointer;text-align:center;font-size:11px;font-weight:600;color:var(--mut)}
+.bgc i{display:block;height:54px;border-radius:11px;margin-bottom:6px;border:1px solid rgba(128,128,128,.3);position:relative;overflow:hidden}
+.bgc i:after{content:"";position:absolute;left:7px;right:7px;top:9px;height:14px;border-radius:4px;background:var(--c2)}
+.bgc i:before{content:"";position:absolute;left:7px;right:16px;top:28px;height:14px;border-radius:4px;background:var(--c2)}
+.bgc.on{color:var(--txt)}.bgc.on i{box-shadow:0 0 0 2px var(--red)}
+.st-selw select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px;-webkit-appearance:none;appearance:none;border:0}
+.st-selw{position:relative;display:flex;align-items:center;gap:5px;color:var(--mut);font-size:14px}
+.st-selw:after{content:"";width:7px;height:7px;border-right:2px solid var(--dim);border-bottom:2px solid var(--dim);transform:rotate(-45deg);margin-left:2px}
+.ord{display:flex;gap:4px}
+.ord button{all:unset;cursor:pointer;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--bg);border:1px solid var(--line);color:var(--mut);font-size:13px}
+.ord button:disabled{opacity:.3;cursor:default}
+.st-btn{all:unset;cursor:pointer;display:block;text-align:center;width:100%;box-sizing:border-box;padding:13px;font-size:15px;font-weight:600;color:var(--loss)}
+.st-badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 7px;border-radius:99px;background:color-mix(in srgb,var(--otl) 18%,transparent);color:var(--otl)}
+.st-foot{text-align:center;color:var(--dim);font-size:11px;margin:22px 0 4px}
+/* sizes */
+html.sz-l section.tab,html.sz-l .top,html.sz-l .tswitch,html.sz-l .sbody{zoom:1.08}
+html.sz-xl section.tab,html.sz-xl .top,html.sz-xl .tswitch,html.sz-xl .sbody{zoom:1.16}
+/* spoilers */
+html.nospoil:not(.reveal) :is([data-spoil]:not(#game),#game[data-spoil]:has(.bx-nums em)){position:relative}
+html.nospoil:not(.reveal) :is([data-spoil]:not(#game),#game[data-spoil]:has(.bx-nums em))>*{filter:blur(11px);pointer-events:none;user-select:none}
+html.nospoil:not(.reveal) :is([data-spoil]:not(#game),#game[data-spoil]:has(.bx-nums em)):after{content:"Scores hidden · tap to reveal";position:absolute;inset:0;width:auto;height:auto;border-radius:0;background:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 14px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);text-shadow:0 1px 8px var(--bg);cursor:pointer;z-index:2}
+/* light theme */
+html.light{color-scheme:light}
+html.light .heroline{color:#52525b}html.light .heroline b,html.light .ls td.tot,html.light .pt th.on,html.light .pt td.on,html.light .tabbar button.on{color:var(--txt)}
+html.light .seg button.on,html.light .xseg button.on,html.light .tswitch a.on{background:#fff;color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+html.light .shx,html.light .cvx{background:#e9e9ee;color:#333}
+html.light .tabbar{background:rgba(255,255,255,.86)!important;border-color:var(--line)!important}
+html.light .tabbar button.on .tlogo{background:var(--red)}
+html.light .card svg text[fill="#6b6b74"]{fill:#8b8b94}
+html.light .card svg circle[fill="#fff"],html.light .card svg text[fill="#fff"]{fill:var(--txt)}
+html.light .card svg line[stroke="#3a3a42"]{stroke:#d4d4da}
+html.light .sheet{box-shadow:0 -10px 40px rgba(0,0,0,.15)}
+html.light .scrim.on{background:rgba(0,0,0,.25)}
+
+/* hero and glows follow the accent and background */
+.hero{background:linear-gradient(135deg,color-mix(in srgb,var(--red) 15%,var(--card)) 0%,var(--card) 60%)}
+.hero:after{background:radial-gradient(circle,color-mix(in srgb,var(--red) 38%,transparent),transparent 70%)}
+.box{border-color:var(--line)}
+html.light .stat{background:rgba(0,0,0,.035)}
+html.light .lt .ln{color:#3f3f46}
+html.light .hero{background:linear-gradient(135deg,color-mix(in srgb,var(--red) 7%,#fff) 0%,#fff 60%)!important}
+html.light .hero:after{opacity:.6}
+html.light .bx-top{background:var(--card2)}
+html.light .chip{color:#fff}
+
+[hidden]{display:none!important}
+
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s;z-index:5}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -405,22 +479,22 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 <body>
 <div class="top">
   <div class="brand"><div class="mono has" id="mono"><img src="data/mlb-logo.png" onerror="this.src='https://a.espncdn.com/i/teamlogos/mlb/500/phi.png'" width="38" height="38" alt="PHI"></div><div><b>On the Fly</b><div id="today"></div></div></div>
-  <div class="pill" id="pill"><span class="dot"></span><span id="pilltxt">Loading…</span></div>
+  <div class="topr"><div class="pill" id="pill"><span class="dot"></span><span id="pilltxt">Loading…</span></div><button class="gear" onclick="openSettings()" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg></button></div>
 </div>
 <div class="tswitch" id="tswitch"></div>
 
 <section class="tab" data-tab="home">
-<div class="card hero">
+<div class="card hero" data-hc="hero" data-spoil>
   <div class="rec" id="rec">–</div>
   <div class="heroline" id="heroline"></div>
   <div class="stats" id="stats"></div>
 </div>
-<div class="card box show" id="game"></div>
-<div class="two">
-  <div class="card"><h2>Last 5</h2><div id="last"></div></div>
+<div class="card box show" id="game" data-hc="game" data-spoil></div>
+<div class="two" data-hc="recent">
+  <div class="card" data-spoil><h2>Last 5</h2><div id="last"></div></div>
   <div class="card"><h2>Next 5</h2><div id="next"></div></div>
 </div>
-<div class="card">
+<div class="card" data-hc="opps">
   <h2>Every opponent <small>tap a team</small></h2>
   <div id="divs"></div>
   <div class="legend" style="margin-top:14px"><span><i style="background:var(--win);border-radius:50%"></i>Win</span><span><i style="background:var(--loss);border-radius:50%"></i>Loss</span><span>● home · ○ away</span></div>
@@ -458,7 +532,114 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 <div class="cv" id="cv"></div>
 
 <script>
-const ME='PHI', TZ='America/New_York', SHORT='Phillies', REPO='watts31/onthefly';
+/* ---------- Settings (saved on this phone) ---------- */
+const APPKEY=(location.pathname.split('/').filter(Boolean).find(x=>!/\.html$/.test(x))||'local').toLowerCase();
+const PAGE=(location.pathname.split('/').pop()||'index.html');
+const CFG_DEF={bg:'black',accent:'',size:'m',startTab:'home',startPage:'',homeOrder:['hero','game','recent','opps'],homeHide:[],spoil:false,tz:'',saver:false,
+  notif:{start:true,score:true,period:false,final:true,quiet:false}};
+let CFG=(()=>{const d=JSON.parse(JSON.stringify(CFG_DEF));try{const s=JSON.parse(localStorage.getItem('cfg-'+APPKEY)||'{}');Object.assign(d,s);d.notif=Object.assign({},CFG_DEF.notif,s.notif||{});
+  const known=CFG_DEF.homeOrder;d.homeOrder=[...d.homeOrder.filter(k=>known.includes(k)),...known.filter(k=>!d.homeOrder.includes(k))]}catch(e){}return d})();
+function saveCfg(){try{localStorage.setItem('cfg-'+APPKEY,JSON.stringify(CFG))}catch(e){}}
+// open on the chosen team (only on a fresh app launch, not when using the toggle)
+try{if(!sessionStorage.getItem('launched-'+APPKEY)){sessionStorage.setItem('launched-'+APPKEY,'1');if(CFG.startPage&&CFG.startPage!==PAGE&&/^[a-z]+\.html$/.test(CFG.startPage))location.replace(CFG.startPage)}}catch(e){}
+const TZ_NAME=CFG.tz||'America/New_York';
+const tzAbbr=t=>{try{return new Intl.DateTimeFormat('en-US',{timeZone:TZ_NAME,timeZoneName:'short'}).formatToParts(new Date(t)).find(p=>p.type==='timeZoneName').value.replace(/^GMT$/,'UTC')}catch(e){return 'ET'}};
+const BGS={
+  black:{n:'Black',v:{}},
+  charcoal:{n:'Graphite',v:{'--bg':'#161618','--card':'#1f1f23','--card2':'#28282d','--line':'#333339'}},
+  navy:{n:'Midnight',v:{'--bg':'#070d1a','--card':'#0f172a','--card2':'#16213a','--line':'#22304d','--rest':'#334155'}},
+  team:{n:'Team',v:{'--bg':'color-mix(in srgb,var(--red) 10%,#09090a)','--card':'color-mix(in srgb,var(--red) 9%,#131316)','--card2':'color-mix(in srgb,var(--red) 10%,#1b1b1f)','--line':'color-mix(in srgb,var(--red) 16%,#26262b)'}},
+  light:{n:'Light',v:{'--bg':'#f2f2f5','--card':'#ffffff','--card2':'#f4f4f7','--line':'#e3e3e8','--txt':'#111114','--mut':'#6e6e78','--dim':'#a8a8b2','--rest':'#d6d6dc'}},
+};
+const ACCENTS=['#ce1126','#e81828','#f74902','#d4a017','#16a34a','#0d9488','#2563eb','#002d72','#7c3aed','#db2777'];
+let ACCENT_DEF=null;
+function applyCfg(){
+  const r=document.documentElement;
+  if(ACCENT_DEF==null)ACCENT_DEF=getComputedStyle(r).getPropertyValue('--red').trim();
+  ['--bg','--card','--card2','--line','--txt','--mut','--dim','--rest'].forEach(k=>r.style.removeProperty(k));
+  Object.entries((BGS[CFG.bg]||BGS.black).v).forEach(([k,v])=>r.style.setProperty(k,v));
+  if(CFG.accent)r.style.setProperty('--red',CFG.accent);else r.style.removeProperty('--red');
+  r.classList.toggle('light',CFG.bg==='light');
+  r.classList.toggle('sz-l',CFG.size==='l');r.classList.toggle('sz-xl',CFG.size==='xl');
+  r.classList.toggle('nospoil',!!CFG.spoil);
+  const mc=document.querySelector('meta[name=theme-color]');if(mc)mc.content=getComputedStyle(r).getPropertyValue('--bg').trim()||'#0a0a0b';
+  const home=document.querySelector('section.tab[data-tab=home]');
+  if(home)CFG.homeOrder.forEach(k=>{const el=home.querySelector(`:scope>[data-hc="${k}"]`);if(el){home.appendChild(el);el.hidden=CFG.homeHide.includes(k)}});
+}
+document.addEventListener('click',e=>{const s=e.target.closest('html.nospoil:not(.reveal) [data-spoil]');if(s){e.preventDefault();e.stopPropagation();document.documentElement.classList.add('reveal')}},true);
+applyCfg();
+
+const HC_NAMES={hero:'Record',game:'Game card',recent:'Last 5 / Next 5',opps:'Every opponent'};
+const TAB_NAMES={home:'Home',season:'Season',players:'Players',cap:'Cap',x:'X'};
+const ICO={
+  bell:'<path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-2 2v1h18v-1z"/>',
+  moon:'<path d="M20.7 14.6A8.5 8.5 0 0 1 9.4 3.3 8.5 8.5 0 1 0 20.7 14.6z"/>',
+  eye:'<path d="M12 5C6 5 2 12 2 12s4 7 10 7 10-7 10-7-4-7-10-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>',
+  bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  globe:'<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15.7 15.7 0 0 0-1.4-4A8 8 0 0 1 18.9 8zM12 4.1A13.8 13.8 0 0 1 13.9 8h-3.8A13.8 13.8 0 0 1 12 4.1zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4zm.8 2h3a15.7 15.7 0 0 0 1.4 4A8 8 0 0 1 5.1 16zm3-8h-3a8 8 0 0 1 4.4-4 15.7 15.7 0 0 0-1.4 4zM12 19.9a13.8 13.8 0 0 1-1.9-3.9h3.8a13.8 13.8 0 0 1-1.9 3.9zM14.3 14H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.2 5.9a15.7 15.7 0 0 0 1.4-3.9h3a8 8 0 0 1-4.4 3.9zm1.8-5.9a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4z"/>',
+};
+const ic=(k,c)=>`<span class="st-ic" style="background:${c}"><svg viewBox="0 0 24 24">${ICO[k]}</svg></span>`;
+const swH=(on,fn)=>`<div class="sw ${on?'on':''}" role="switch" aria-checked="${!!on}" onclick="${fn}"></div>`;
+const sgH=(opts,cur,fn)=>`<div class="sg">${opts.map(([v,l])=>`<button class="${v===cur?'on':''}" onclick="${fn}('${v}')">${l}</button>`).join('')}</div>`;
+function setCfg(k,v){CFG[k]=v;saveCfg();applyCfg();cfgAfter(k);renderSettings()}
+function cfgAfter(k){
+  if(k==='tz'){setTimeout(()=>location.reload(),150)}
+  if(k==='spoil')document.documentElement.classList.remove('reveal');
+  if(k==='bg'||k==='accent'){try{typeof render==='function'&&render()}catch(e){}}
+}
+function togNotif(k){CFG.notif[k]=!CFG.notif[k];saveCfg();renderSettings()}
+function togHide(k){const h=CFG.homeHide;CFG.homeHide=h.includes(k)?h.filter(x=>x!==k):[...h,k];saveCfg();applyCfg();renderSettings()}
+function moveHC(i,d){const o=[...CFG.homeOrder],j=i+d;if(j<0||j>=o.length)return;[o[i],o[j]]=[o[j],o[i]];CFG.homeOrder=o;saveCfg();applyCfg();renderSettings()}
+function resetCfg(){CFG=JSON.parse(JSON.stringify(CFG_DEF));saveCfg();applyCfg();cfgAfter('bg');renderSettings()}
+function openSettings(){showSheet('<div id="cfgbody"></div>');renderSettings()}
+function renderSettings(){
+  const el=document.getElementById('cfgbody');if(!el)return;
+  const tabs=(typeof TABS!=='undefined'?TABS:['home','season','players','x']);
+  const sw=(typeof SWITCH!=='undefined'&&SWITCH)||null, N=CFG.notif;
+  const tzs=[['','Eastern (default)'],['America/Chicago','Central'],['America/Denver','Mountain'],['America/Phoenix','Arizona'],['America/Los_Angeles','Pacific'],['America/Anchorage','Alaska'],['Pacific/Honolulu','Hawaii'],['Europe/London','UK'],['Europe/Berlin','Central Europe']];
+  const nr=(k,l,sub)=>`<div class="st-r"><div class="lab">${l}${sub?`<small>${sub}</small>`:''}</div>${swH(N[k],`togNotif('${k}')`)}</div>`;
+  let h=`<div class="st-h">Settings</div>
+  <div class="st-g">Appearance</div>
+  <div class="st-list">
+    <div class="st-full"><div class="lab">Background</div><div class="bgs">${Object.entries(BGS).map(([k,b])=>{const v={...BGS.black.v,'--bg':'#0a0a0b','--card':'#131316',...b.v};
+      const bg=k==='team'?`color-mix(in srgb,${CFG.accent||ACCENT_DEF} 22%,#09090a)`:v['--bg'], c2=k==='team'?`color-mix(in srgb,${CFG.accent||ACCENT_DEF} 18%,#1b1b1f)`:(v['--card2']||'#1a1a1e');
+      return `<button class="bgc ${CFG.bg===k?'on':''}" onclick="setCfg('bg','${k}')"><i style="background:${bg};--c2:${c2}"></i>${b.n}</button>`}).join('')}</div></div>
+    <div class="st-full" style="border-top:1px solid var(--line)"><div class="lab">Accent color</div><div class="sws">
+      <button class="swc ${!CFG.accent?'on':''}" style="background:${ACCENT_DEF}" onclick="setCfg('accent','')" aria-label="Team color"></button>
+      ${ACCENTS.filter(c=>{const h=x=>{x=String(x).replace('#','');return [0,2,4].map(i=>parseInt(x.substr(i,2),16))},A=h(c),B=h(ACCENT_DEF);return Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2])>70||CFG.accent===c}).map(c=>`<button class="swc ${CFG.accent===c?'on':''}" style="background:${c}" onclick="setCfg('accent','${c}')"></button>`).join('')}</div>
+      <div class="st-f" style="margin:8px 0 0">First circle is the team color.</div></div>
+    <div class="st-r"><div class="lab">Text size</div>${sgH([['m','Standard'],['l','Large'],['xl','Larger']],CFG.size,"setCfg.bind(null,'size')")}</div>
+  </div>
+  <div class="st-g">Startup</div>
+  <div class="st-list">
+    ${sw?`<div class="st-r"><div class="lab">Open on</div>${sgH(sw.map(([l,hf])=>[hf,l]),CFG.startPage||sw[0][1],"setCfg.bind(null,'startPage')")}</div>`:''}
+    <div class="st-r"><div class="lab">First tab</div><div class="st-selw">${TAB_NAMES[CFG.startTab]||'Home'}<select onchange="setCfg('startTab',this.value)">${tabs.map(t=>`<option value="${t}" ${t===CFG.startTab?'selected':''}>${TAB_NAMES[t]||t}</option>`).join('')}</select></div></div>
+  </div>
+  ${sw?`<div class="st-f">Each team has its own tabs. If one doesn't have the tab picked here, it opens on Home.</div>`:''}
+  <div class="st-g">Home screen</div>
+  <div class="st-list">${CFG.homeOrder.map((k,i)=>`<div class="st-r ${CFG.homeHide.includes(k)?'off':''}"><div class="lab">${HC_NAMES[k]}</div><div class="ord"><button ${i?'':'disabled'} onclick="moveHC(${i},-1)" aria-label="Move up">▲</button><button ${i<CFG.homeOrder.length-1?'':'disabled'} onclick="moveHC(${i},1)" aria-label="Move down">▼</button></div>${swH(!CFG.homeHide.includes(k),`togHide('${k}')`)}</div>`).join('')}</div>
+  <div class="st-f">Reorder or hide the cards on the Home tab.</div>
+  <div class="st-g">Games</div>
+  <div class="st-list">
+    <div class="st-r">${ic('eye','#6366f1')}<div class="lab">Hide scores<small>Blurs the latest game, Last 5 and record until you tap</small></div>${swH(CFG.spoil,`setCfg('spoil',${!CFG.spoil})`)}</div>
+    <div class="st-r">${ic('bolt','#f59e0b')}<div class="lab">Battery saver<small>Live games refresh every minute instead of every 10 seconds</small></div>${swH(CFG.saver,`setCfg('saver',${!CFG.saver})`)}</div>
+    <div class="st-r">${ic('globe','#0ea5e9')}<div class="lab">Time zone</div><div class="st-selw">${(tzs.find(z=>z[0]===CFG.tz)||tzs[0])[1].replace(' (default)','')}<select onchange="setCfg('tz',this.value)">${tzs.map(([v,l])=>`<option value="${v}" ${v===CFG.tz?'selected':''}>${l}</option>`).join('')}</select></div></div>
+  </div>
+  <div class="st-g">Notifications <span class="st-badge" style="margin-left:6px">COMING SOON</span></div>
+  <div class="st-list">
+    ${nr('start','Game starting','A few minutes before puck drop or first pitch')}
+    ${nr('score','Scoring plays','Goals and runs, both teams')}
+    ${nr('period','Period and inning ends','')}
+    ${nr('final','Final score','')}
+    <div class="st-r">${ic('moon','#8b5cf6')}<div class="lab">Quiet hours<small>No alerts 11 pm – 8 am</small></div>${swH(N.quiet,"togNotif('quiet')")}</div>
+  </div>
+  <div class="st-f">Your choices are saved now and will be used once alerts go live.</div>
+  <div class="st-list" style="margin-top:22px"><button class="st-btn" onclick="resetCfg()">Reset to defaults</button></div>
+  <div class="st-foot">Settings are saved on this phone.</div>`;
+  el.innerHTML=h;
+}
+
+const ME='PHI', TZ=TZ_NAME, SHORT='Phillies', REPO='watts31/onthefly';
 // MLB team colours (abbr -> [name, colour]) and divisions
 const MLB={ARI:['Diamondbacks','#a71930'],AZ:['Diamondbacks','#a71930'],ATH:['Athletics','#003831'],OAK:['Athletics','#003831'],ATL:['Braves','#ce1141'],BAL:['Orioles','#df4601'],BOS:['Red Sox','#bd3039'],CHC:['Cubs','#0e3386'],CWS:['White Sox','#27251f'],CIN:['Reds','#c6011f'],CLE:['Guardians','#00385d'],COL:['Rockies','#333366'],DET:['Tigers','#0c2340'],HOU:['Astros','#eb6e1f'],KC:['Royals','#004687'],LAA:['Angels','#ba0021'],LAD:['Dodgers','#005a9c'],MIA:['Marlins','#00a3e0'],MIL:['Brewers','#12284b'],MIN:['Twins','#002b5c'],NYM:['Mets','#002d72'],NYY:['Yankees','#0c2340'],PHI:['Phillies','#e81828'],PIT:['Pirates','#27251f'],SD:['Padres','#2f241d'],SF:['Giants','#fd5a1e'],SEA:['Mariners','#0c2c56'],STL:['Cardinals','#c41e3a'],TB:['Rays','#092c5c'],TEX:['Rangers','#003278'],TOR:['Blue Jays','#134a8e'],WSH:['Nationals','#ab0003']};
 const DIVNAMES={201:'AL East',202:'AL Central',200:'AL West',204:'NL East',205:'NL Central',203:'NL West'};
@@ -523,7 +704,7 @@ function render(){
     const away=nextG.home?nextG.opp:ME, home=nextG.home?ME:nextG.opp, st=nextG.type==='S';
     $('game').innerHTML=`<div class="bx-top"><span style="color:var(--mut)">${st?'NEXT GAME · SPRING TRAINING':'NEXT GAME'}</span><span>${fmt(nextG.t,{weekday:'short',month:'short',day:'numeric'})} · in ${days(nextG.t)} days</span></div>
      <div class="bx-score"><div class="bx-team">${mark(away,56)}<b>${MLB[away]?.[0]||away}</b><span class="sub">Away</span></div>
-     <div style="text-align:center"><div class="bx-nums" style="font-size:40px">${fmt(nextG.t,{hour:'numeric',minute:'2-digit'}).replace(/ ?[AP]M/,'')}</div><div class="sub" style="font-weight:600;letter-spacing:.06em">${fmt(nextG.t,{hour:'numeric'}).slice(-2)} ET</div></div>
+     <div style="text-align:center"><div class="bx-nums" style="font-size:40px">${fmt(nextG.t,{hour:'numeric',minute:'2-digit'}).replace(/ ?[AP]M/,'')}</div><div class="sub" style="font-weight:600;letter-spacing:.06em">${fmt(nextG.t,{hour:'numeric'}).slice(-2)} ${tzAbbr(nextG.t)}</div></div>
      <div class="bx-team">${mark(home,56)}<b>${MLB[home]?.[0]||home}</b><span class="sub">Home</span></div></div>
      ${opening&&st?`<div class="pv"><div class="pvr"><span class="k">OPENING DAY</span><span class="v">${fmt(opening.t,{weekday:'short',month:'short',day:'numeric'})} ${opening.home?'vs':'@'} ${MLB[opening.opp]?.[0]||opening.opp} · in ${days(opening.t)} days</span></div></div>`:''}`;
   } else $('game').innerHTML=`<div class="bx-top"><span>OFFSEASON</span><span></span></div><div class="bx-clock" style="padding:16px">The ${D.next} schedule isn't out yet.</div>`;
@@ -799,9 +980,10 @@ function bsAdd(){let v=(document.getElementById('bsin').value||'').trim().replac
  const el=$('tlogo');el.style.webkitMaskImage=el.style.maskImage=`url(${c.toDataURL()})`;$('tabbar').classList.add('haslogo')}catch(e){}})();
 
 /* Flyers | Phillies switch */
-$('tswitch').innerHTML=`<a href="index.html"><img src="https://a.espncdn.com/i/teamlogos/nhl/500/phi.png" alt="">Flyers</a><a class="on" href="phillies.html"><img src="https://a.espncdn.com/i/teamlogos/mlb/500/phi.png" alt="">Phillies</a>`;
+const SWITCH=[['Flyers','index.html','https://a.espncdn.com/i/teamlogos/nhl/500/phi.png'],['Phillies','phillies.html','https://a.espncdn.com/i/teamlogos/mlb/500/phi.png']];
+$('tswitch').innerHTML=SWITCH.map(([l,h,img])=>`<a class="${h===PAGE?'on':''}" href="${h}"><img src="${img}" alt="">${l}</a>`).join('');
 
-load(); go('home'); setInterval(()=>{if(!document.hidden)load()},600e3);
+load(); go(TABS.includes(CFG.startTab)?CFG.startTab:'home'); setInterval(()=>{if(!document.hidden)load()},600e3);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
 </script>
 </body>
