@@ -122,7 +122,7 @@ await safe('all players', async () => {
 // franchise history (refreshed weekly)
 await safe('history', async () => {
   let H = null; try { H = JSON.parse(readFileSync('data/mlb-history.json', 'utf8')); } catch {}
-  if (H && Date.now() - new Date(H.updated) < 7 * 864e5 && H.seasons?.[0]?.y === season) return;
+  if (H && H.v === 2 && Date.now() - new Date(H.updated) < 7 * 864e5 && H.seasons?.[0]?.y === season) return;
   const seasons = [];
   for (let y = season; y >= 1883; y--) {
     const d = await safe('standings ' + y, () => get(`/standings?leagueId=104&season=${y}`), { records: [] });
@@ -132,7 +132,7 @@ await safe('history', async () => {
   for (const s of seasons) {
     if (s.y < 1903 || (s.w / (s.w + s.l) < 0.52 && s.y !== 1981)) continue;
     const d = await safe('post ' + s.y, () => get(`/schedule/postseason/series?sportId=1&season=${s.y}&teamId=${TEAM_ID}`), {});
-    const ser = (d.series || []).map((x) => { const last = x.games?.[x.games.length - 1]; if (!last) return null;
+    const ser = (d.series || []).filter((x) => ['F', 'D', 'L', 'W'].includes(x.series?.id?.[0]) && (x.games || []).some((g) => g.teams.home.team.id === TEAM_ID || g.teams.away.team.id === TEAM_ID)).map((x) => { const last = x.games?.[x.games.length - 1]; if (!last) return null;
       const side = last.teams.home.team.id === TEAM_ID ? last.teams.home : last.teams.away; const opp = side === last.teams.home ? last.teams.away : last.teams.home;
       return { round: x.series?.id?.[0], name: last.seriesDescription || '', won: !!side.isWinner, opp: opp.team?.name || '' }; }).filter(Boolean);
     if (ser.length) s.post = ser;
@@ -141,7 +141,7 @@ await safe('history', async () => {
     .map((x) => ({ id: x.player.id, n: x.player.fullName, v: x.stat[k] }));
   const leaders = { homeRuns: await lead('hitting', 'homeRuns'), hits: await lead('hitting', 'hits'), rbi: await lead('hitting', 'rbi'), stolenBases: await lead('hitting', 'stolenBases'),
     wins: await lead('pitching', 'wins'), strikeOuts: await lead('pitching', 'strikeOuts') };
-  writeFileSync('data/mlb-history.json', JSON.stringify({ updated: now.toISOString(), seasons, leaders }));
+  writeFileSync('data/mlb-history.json', JSON.stringify({ v: 2, updated: now.toISOString(), seasons, leaders }));
   console.log('history', seasons.length, 'seasons', seasons.filter((s) => s.post).length, 'postseasons');
 }, null);
 // calendar feed
