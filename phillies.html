@@ -568,7 +568,6 @@ html.light .nseg{background:var(--bg)}
 .grab{width:40px;height:5px;border-radius:9px;background:var(--dim);margin:0 auto 14px}
 .foot{text-align:center;color:var(--dim);font-size:11px;margin-top:6px;line-height:1.6}
 
-/* Phillies page extras */
 .dots{display:flex;flex-wrap:wrap;gap:3px;max-width:200px}
 .dots i{width:8px;height:8px;border-radius:50%;display:block}
 .row b{flex:none}
@@ -773,13 +772,14 @@ const col=r=>r==='W'?'var(--win)':r==='L'?'var(--loss)':'var(--rest)';
 const tm=t=>t==='AZ'?'ARI':t;
 const recOf=a=>`${a.filter(g=>res(g)==='W').length}-${a.filter(g=>res(g)==='L').length}`;
 
-/* ---------- Jersey-number badge: white pinstripes, red number with navy outline ---------- */
+/* ---------- Jersey-number badge (colours per team) ---------- */
+const JN={bg:'#f6f4ef',stripe:'#e81828',num:'#e81828',edge:'#002d72',ew:2.2};
 function jn(n,lg,name=''){
-  if(n===''||n==null)return `<span class="jn ${lg?'lg':''}" style="background:#e81828">${esc(name.split(/[ .]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase())}</span>`;
+  if(n===''||n==null)return `<span class="jn ${lg?'lg':''}" style="background:${JN.num}">${esc(name.split(/[ .]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase())}</span>`;
   const two=String(n).length>1;
-  const stripes=Array.from({length:6},(_,i)=>`<line x1="${3+i*6}" y1="0" x2="${3+i*6}" y2="46" stroke="#e81828" stroke-opacity=".35" stroke-width=".7"/>`).join('');
-  return `<svg class="bnr ${lg?'lg':''}" viewBox="0 0 36 46" aria-label="#${n}"><rect x=".5" y=".5" width="35" height="45" rx="1.5" fill="#f6f4ef" stroke="#000" stroke-opacity=".35"/>${stripes}
-   <text x="18" y="35" text-anchor="middle" font-family="'Oswald',sans-serif" font-weight="700" font-size="${two?32:34}" ${two?'textLength="29" lengthAdjust="spacingAndGlyphs"':''} fill="#e81828" stroke="#002d72" stroke-width="2.2" stroke-linejoin="round" paint-order="stroke">${n}</text></svg>`;
+  const stripes=JN.stripe?Array.from({length:6},(_,i)=>`<line x1="${3+i*6}" y1="0" x2="${3+i*6}" y2="46" stroke="${JN.stripe}" stroke-opacity=".35" stroke-width=".7"/>`).join(''):'';
+  return `<svg class="bnr ${lg?'lg':''}" viewBox="0 0 36 46" aria-label="#${n}"><rect x=".5" y=".5" width="35" height="45" rx="1.5" fill="${JN.bg}" stroke="#000" stroke-opacity=".35"/>${stripes}
+   <text x="18" y="35" text-anchor="middle" font-family="'Oswald',sans-serif" font-weight="700" font-size="${two?32:34}" ${two?'textLength="29" lengthAdjust="spacingAndGlyphs"':''} fill="${JN.num}" ${JN.ew?`stroke="${JN.edge}" stroke-width="${JN.ew}" stroke-linejoin="round" paint-order="stroke"`:''}>${n}</text></svg>`;
 }
 
 /* ---------- Load ---------- */
@@ -1163,11 +1163,11 @@ const X_DEFAULT={
  team:{label:'Team',icon:'⚾',title:'Official Phillies',sub:'Team announcements, lineups, highlights',
    q:'from:Phillies',accts:[['Phillies','Philadelphia Phillies','Official team account']]},
  press:{label:'Reporters',icon:'📰',title:'Beat reporters',sub:'Clubhouse news, lineups, injuries',
-   q:null,accts:[['MattGelb','Matt Gelb','The Athletic'],['ToddZolecki','Todd Zolecki','MLB.com'],['ScottLauber','Scott Lauber','Philadelphia Inquirer']]},
+   q:null,accts:[['MattGelb', 'Matt Gelb', 'The Athletic'], ['ToddZolecki', 'Todd Zolecki', 'MLB.com'], ['ScottLauber', 'Scott Lauber', 'Philadelphia Inquirer']]},
  fans:{label:'Fan talk',icon:'📣',title:'Fan talk',sub:'What the fanbase is saying',
-   q:'(#RingTheBell OR #Phillies OR Phillies) -from:Phillies',accts:[['thegoodphight','The Good Phight','Fan site'],['CrossingBroad','Crossing Broad','Philly sports blog']]},
+   q:"(#RingTheBell OR #Phillies OR Phillies) -from:Phillies",accts:[['thegoodphight', 'The Good Phight', 'Fan site'], ['CrossingBroad', 'Crossing Broad', 'Philly sports blog']]},
  trade:{label:'Trade Breaker',icon:'🚨',title:'Trade Breaker',sub:'MLB insiders — filtered to Phillies talk',
-   q:null,filter:'(Phillies OR PHI OR Philadelphia)',accts:[['Ken_Rosenthal','Ken Rosenthal','The Athletic / FOX'],['JeffPassan','Jeff Passan','ESPN'],['JonHeyman','Jon Heyman','NY Post / MLB Network'],['BNightengale','Bob Nightengale','USA Today'],['Feinsand','Mark Feinsand','MLB.com']]}
+   q:null,filter:"(Phillies OR PHI OR Philadelphia)",accts:[['Ken_Rosenthal','Ken Rosenthal','The Athletic / FOX'],['JeffPassan','Jeff Passan','ESPN'],['JonHeyman','Jon Heyman','NY Post / MLB Network'],['BNightengale','Bob Nightengale','USA Today'],['Feinsand','Mark Feinsand','MLB.com']]}
 };
 // Bluesky accounts (shown as real posts inside the app). Found via web search Nov 16 2026.
 const BS_DEFAULT={
@@ -1226,7 +1226,7 @@ function xEmbed(hd){
 
 /* ---------- Bluesky: real posts, free public API ---------- */
 const BS_API=['https://public.api.bsky.app/xrpc/','https://api.bsky.app/xrpc/'];
-const DEV_RE=/phillies|philadelphia|phi|harper|schwarber|trea turner|wheeler|nola|realmuto|thomson|dombrowski|citizens bank park/i;
+const DEV_RE=/phillies|philadelphia|\bphi\b|harper|schwarber|trea turner|wheeler|\bnola\b|realmuto|thomson|dombrowski|citizens bank park/i;
 async function bsGet(path){let err;for(const b of BS_API){try{return await getJSON(b+path)}catch(e){err=e}}throw err}
 function bsCardHTML(){
   const list=bsAccts(XSEC), q=BS_SEARCH[XSEC];

@@ -830,6 +830,7 @@ const TEAMS={
  SEA:['Seattle','Pacific','#2b7a8a'],CGY:['Calgary','Pacific','#c8102e'],LAK:['Los Angeles','Pacific','#3a3a3a'],VAN:['Vancouver','Pacific','#00205b']
 };
 const DIVS=['Atlantic','Pacific','Metropolitan','Central'];
+const MYDIV=TEAMS[ME]?.[1]||'Metropolitan', CONF=['Metropolitan','Atlantic'].includes(MYDIV)?[MYDIV,MYDIV==='Metropolitan'?'Atlantic':'Metropolitan']:[MYDIV,MYDIV==='Pacific'?'Central':'Pacific'];
 const ALIAS={TB:'TBL',LA:'LAK',SJ:'SJS',NJ:'NJD',UTAH:'UTA',UTM:'UTA',WAS:'WSH',VEG:'VGK',LV:'VGK',MON:'MTL',CLS:'CBJ',NAS:'NSH',CAL:'CGY',ARI:'UTA'};
 const ESPN_CODE={NJD:'nj',TBL:'tb',LAK:'la',SJS:'sj',UTA:'utah'};
 const norm=a=>{a=(a||'').toUpperCase();return ALIAS[a]||a};
@@ -1104,12 +1105,12 @@ function render(){
 
   // record
   let sk='',n=0; for(let i=played.length-1;i>=0;i--){const r=played[i].res==='O'?'L':played[i].res; if(!sk)sk=r; if(r===sk)n++; else break;}
-  const pos=ORDER.Metropolitan.indexOf(ME)+1;
+  const pos=ORDER[MYDIV].indexOf(ME)+1;
   const pic=picture(), firstOut=pic.chasers[0], gap=firstOut?pts-(STAND[firstOut]?.[1]??0):0;
   const rec=f=>{const a=played.filter(f);return `${a.filter(g=>g.res==='W').length}-${a.filter(g=>g.res==='L').length}-${a.filter(g=>g.res==='O').length}`};
   const last10=played.slice(-10);
   document.getElementById('rec').textContent=`${W}-${L}-${O}`;
-  document.getElementById('heroline').innerHTML=`<b>${pts} points</b> · ${ord(pos)} in the Metropolitan · ${sk==='W'?'won':'lost'} ${n} straight`;
+  document.getElementById('heroline').innerHTML=`<b>${pts} points</b> · ${ord(pos)} in the ${MYDIV} · ${sk==='W'?'won':'lost'} ${n} straight`;
   document.getElementById('stats').innerHTML=[['Home',rec(g=>g.home)],['Road',rec(g=>!g.home)],['Last 10',rec(g=>last10.includes(g))],['Playoff line',(gap>=0?'+':'')+gap]]
     .map(([k,v])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
 
@@ -1143,9 +1144,9 @@ function render(){
   // playoff picture
   const row=(t,seed,cls='')=>`<tr class="${t===ME?'me':''} ${cls}"><td class="seed">${seed}</td><td><div class="tn">${mark(t,22)}${TEAMS[t][0]}</div></td><td class="r" style="color:var(--mut)">${STAND[t]?.[0]??'–'}</td><td class="r">${STAND[t]?.[1]??'–'}</td></tr>`;
   document.getElementById('cutline').textContent=gap>=0?`${gap} clear of the cut`:`${-gap} back`;
-  document.getElementById('picture').innerHTML=`<tr class="sec"><td></td><td>Metropolitan</td><td class="r" style="font-size:10px">GP</td><td class="r" style="font-size:10px">PTS</td></tr>`+
-    pic.metro.map((t,i)=>row(t,'M'+(i+1))).join('')+`<tr class="sec"><td></td><td colspan="3">Atlantic</td></tr>`+
-    pic.atl.map((t,i)=>row(t,'A'+(i+1))).join('')+`<tr class="sec"><td></td><td colspan="3">Wild card</td></tr>`+
+  document.getElementById('picture').innerHTML=`<tr class="sec"><td></td><td>${CONF[0]}</td><td class="r" style="font-size:10px">GP</td><td class="r" style="font-size:10px">PTS</td></tr>`+
+    pic.metro.map((t,i)=>row(t,CONF[0][0]+(i+1))).join('')+`<tr class="sec"><td></td><td colspan="3">${CONF[1]}</td></tr>`+
+    pic.atl.map((t,i)=>row(t,CONF[1][0]+(i+1))).join('')+`<tr class="sec"><td></td><td colspan="3">Wild card</td></tr>`+
     pic.wc.map((t,i)=>row(t,'WC'+(i+1))).join('')+pic.chasers.map((t,i)=>row(t,String(i+9),i===0?'cut':'')).join('');
 
   document.getElementById('foot').innerHTML=LIVE?`Scores: ESPN public feed · Player stats: NHL public API`:
@@ -1154,8 +1155,8 @@ function render(){
 
 function picture(){
   const top3=d=>ORDER[d].filter(t=>STAND[t]).slice(0,3);
-  const metro=top3('Metropolitan'), atl=top3('Atlantic');
-  const rest=[...ORDER.Atlantic,...ORDER.Metropolitan].filter(t=>STAND[t]&&!metro.includes(t)&&!atl.includes(t)).sort((a,b)=>rank(b)-rank(a));
+  const metro=top3(CONF[0]), atl=top3(CONF[1]);
+  const rest=[...ORDER[CONF[1]],...ORDER[CONF[0]]].filter(t=>STAND[t]&&!metro.includes(t)&&!atl.includes(t)).sort((a,b)=>rank(b)-rank(a));
   return {metro,atl,wc:rest.slice(0,2),chasers:rest.slice(2)};
 }
 
