@@ -122,12 +122,12 @@ await safe('all players', async () => {
 // franchise history (refreshed weekly)
 await safe('history', async () => {
   let H = null; try { H = JSON.parse(readFileSync('data/mlb-history.json', 'utf8')); } catch {}
-  if (H && H.v === 2 && Date.now() - new Date(H.updated) < 7 * 864e5 && H.seasons?.[0]?.y === season) return;
+  if (H && H.v === 3 && Date.now() - new Date(H.updated) < 7 * 864e5 && H.seasons?.[0]?.y === season) return;
   const seasons = [];
   for (let y = season; y >= 1883; y--) {
     const d = await safe('standings ' + y, () => get(`/standings?leagueId=104&season=${y}`), { records: [] });
     for (const r of d.records || []) for (const t of r.teamRecords || []) if (t.team.id === TEAM_ID)
-      seasons.push({ y, w: t.wins, l: t.losses, pct: t.winningPercentage, dr: +t.divisionRank || null, div: r.division?.id ? (r.division.nameShort || r.division.name || '') : '', gb: t.gamesBack });
+      seasons.push({ y, w: t.wins, l: t.losses, pct: t.winningPercentage, dr: +t.divisionRank || null, divId: r.division?.id || null, gb: t.gamesBack });
   }
   for (const s of seasons) {
     if (s.y < 1903 || (s.w / (s.w + s.l) < 0.52 && s.y !== 1981)) continue;
@@ -141,7 +141,7 @@ await safe('history', async () => {
     .map((x) => ({ id: x.player.id, n: x.player.fullName, v: x.stat[k] }));
   const leaders = { homeRuns: await lead('hitting', 'homeRuns'), hits: await lead('hitting', 'hits'), rbi: await lead('hitting', 'rbi'), stolenBases: await lead('hitting', 'stolenBases'),
     wins: await lead('pitching', 'wins'), strikeOuts: await lead('pitching', 'strikeOuts') };
-  writeFileSync('data/mlb-history.json', JSON.stringify({ v: 2, updated: now.toISOString(), seasons, leaders }));
+  writeFileSync('data/mlb-history.json', JSON.stringify({ v: 3, updated: now.toISOString(), seasons, leaders }));
   console.log('history', seasons.length, 'seasons', seasons.filter((s) => s.post).length, 'postseasons');
 }, null);
 // calendar feed
