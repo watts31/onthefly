@@ -1,6 +1,7 @@
 // Runs on GitHub's servers a few times a day: injuries, prospects, draft picks and franchise history
 // for the More and News tabs. Saved to data/extra.json.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+mkdirSync('data', { recursive: true });
 const TEAM = 'PHI', FRANCHISE = 16, ESPN_NAME = 'Philadelphia Flyers', CW = 'philadelphia_flyers', ESPN_ABBR = 'phi', SHORT = 'Flyers';
 const UA = { 'User-Agent': 'Mozilla/5.0 (personal team app)' };
 const get = async (u) => { const r = await fetch(u, { headers: UA }); if (!r.ok) throw new Error(`${r.status} ${u}`); return r.json(); };
