@@ -321,6 +321,19 @@ svg.bnr.lg{width:38px;height:49px}
 .cvdots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:60%}
 .cvdots i{width:7px;height:7px;border-radius:50%;background:#33333b}.cvdots i.on{background:var(--red);transform:scale(1.3)}
 .cvauto{display:flex;gap:8px;align-items:center;justify-content:center;color:var(--mut);font-size:12px;padding:6px 0 18px;margin-bottom:auto}
+/* landscape: full-screen video, controls float on top and fade away */
+@media (orientation:landscape) and (max-height:560px){
+ .cv{padding:0}
+ .cvstage{position:fixed;inset:0;width:auto;height:auto;aspect-ratio:auto;margin:0}
+ .cvstage video{object-fit:contain}
+ .cvtop{position:fixed;top:0;left:0;right:0;z-index:3;padding:max(12px,env(safe-area-inset-top)) calc(env(safe-area-inset-right) + 16px) 28px calc(env(safe-area-inset-left) + 18px);background:linear-gradient(rgba(0,0,0,.55),transparent);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);pointer-events:none;transition:opacity .35s}
+ .cvtop .cvx{pointer-events:auto;background:rgba(20,20,24,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);width:36px;height:36px}
+ .cvnav{position:fixed;left:0;right:0;top:50%;transform:translateY(-50%);z-index:3;padding:0 calc(env(safe-area-inset-right) + 14px) 0 calc(env(safe-area-inset-left) + 14px);pointer-events:none;transition:opacity .35s}
+ .cvnav button{pointer-events:auto;background:rgba(20,20,24,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);width:44px;height:44px;font-size:24px}
+ .cvdots,.cvmeta,.cvauto{display:none}
+ .cv.idle .cvtop,.cv.idle .cvnav{opacity:0}
+ .cv.idle .cvtop .cvx,.cv.idle .cvnav button{pointer-events:none}
+}
 
 
 /* sheet scroll + close */
@@ -1788,12 +1801,15 @@ function openClips(i,all){
   document.getElementById('cv').classList.add('on');document.getElementById('cv').setAttribute('aria-hidden','false');
   showClip(i);
 }
+let cvIdleT=null;
+function cvWake(){const cv=document.getElementById('cv');cv.classList.remove('idle');clearTimeout(cvIdleT);cvIdleT=setTimeout(()=>cv.classList.add('idle'),2500)}
+document.getElementById('cv').addEventListener('pointerdown',cvWake,true);
 function closeClips(){if(history.state?.layer==='clips'){history.back();return}hideClips()}
 function hideClips(){const v=document.getElementById('cvv');v.pause();v.removeAttribute('src');v.load();document.getElementById('cv').classList.remove('on');document.getElementById('cv').setAttribute('aria-hidden','true');if(!document.getElementById('sheet').classList.contains('on'))lockBody(false)}
 function stepClip(d){const n=CLIPAT+d;if(n>=0&&n<REEL.length)showClip(n)}
 async function showClip(i){
   document.querySelectorAll('.cvif').forEach(f=>f.remove());
-  CLIPAT=i; const c=REEL[i], v=document.getElementById('cvv'), ld=document.getElementById('cvload');
+  CLIPAT=i; cvWake(); const c=REEL[i], v=document.getElementById('cvv'), ld=document.getElementById('cvload');
   document.getElementById('cvcount').textContent=`GOAL ${i+1} OF ${REEL.length}`;
   document.getElementById('cvtitle').textContent=c.title; document.getElementById('cvtitle').dataset.pl=c.title; document.getElementById('cvtitle').dataset.team=c.team;
   document.getElementById('cvsub').textContent=c.sub;
